@@ -1,7 +1,8 @@
 <template>
   <div>
     <a-input-search
-      placeholder="input search text"
+      :style="{ width: '600px', marginTop: '200px', marginLeft: '30%' }"
+      placeholder="请输入"
       enter-button="Search"
       size="large"
       @search="onSearch"
@@ -23,8 +24,7 @@ export default {
         return {}
     },
     methods: {
-        onSearch() {
-        },
+        onSearch() {},
     },
     components: {}
 }
