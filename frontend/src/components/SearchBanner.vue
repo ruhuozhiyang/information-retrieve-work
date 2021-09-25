@@ -29,6 +29,7 @@ export default {
     },
     methods: {
         onSearch(value) {
+          this.$router.push('/result');
           const params = {
             content: value
           };
