@@ -46,7 +46,7 @@ export default {
 <style scoped>
 .main {
     text-align: center;
-    width: 600px;
+    width: 650px;
     height: 200px;
     margin: auto;
     margin-top: 200px;
