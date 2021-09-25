@@ -1,5 +1,5 @@
 <template>
-  <div class="main">
+  <div :class="tagsChoose">
     <a-input-search
       v-model="searchValue"
       placeholder="请输入"
@@ -21,15 +21,22 @@ Vue.component(Input.name, Input);
 Vue.component(Search.name, Search);
 
 export default {
+    props: {
+      content: String,
+    },
     name: 'SearchBanner',
     data() {
         return {
-          searchValue: ''
+          searchValue: '',
+          tagsChoose: 'main',
         }
     },
     methods: {
         onSearch(value) {
-          this.$router.push('/result');
+          if (!value) {
+            return
+          }
+          this.$router.push({ path: '/result', query: { content: this.searchValue }});
           const params = {
             content: value
           };
@@ -39,6 +46,14 @@ export default {
             global.console.log(err);
           });
         },
+    },
+    mounted() {
+      this.tagsChoose = this.$route.path === '/' ? 'main' : 'subPage';
+    },
+    watch: {
+      content(value) {
+        this.searchValue = value;
+      },
     },
     components: {}
 }
@@ -51,6 +66,19 @@ export default {
     height: 200px;
     margin: auto;
     margin-top: 200px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+.subPage {
+    text-align: center;
+    width: 650px;
+    height: 200px;
+    margin: auto;
+    margin-top: 20px;
+    margin-left: 150px;
     position: absolute;
     top: 0;
     left: 0;
