@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="main">
     <a-input-search
-      :style="{ width: '600px', marginTop: '200px', marginLeft: '30%' }"
+      v-model="searchValue"
       placeholder="请输入"
       enter-button="Search"
       size="large"
@@ -13,7 +13,9 @@
 <script>
 import { Input } from 'ant-design-vue';
 import Vue from 'vue';
+import axios from 'axios';
 
+const searchApi = '';
 const { Search } = Input;
 Vue.component(Input.name, Input);
 Vue.component(Search.name, Search);
@@ -21,15 +23,37 @@ Vue.component(Search.name, Search);
 export default {
     name: 'SearchBanner',
     data() {
-        return {}
+        return {
+          searchValue: ''
+        }
     },
     methods: {
-        onSearch() {},
+        onSearch(value) {
+          const params = {
+            content: value
+          };
+          axios.post(searchApi, params).then((res) => {
+            global.console.log(res);
+          }).catch((err) => {
+            global.console.log(err);
+          });
+        },
     },
     components: {}
 }
 </script>
 
-<style>
-
+<style scoped>
+.main {
+    text-align: center;
+    width: 600px;
+    height: 200px;
+    margin: auto;
+    margin-top: 200px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
 </style>
