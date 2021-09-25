@@ -15,7 +15,7 @@ import { Input } from 'ant-design-vue';
 import Vue from 'vue';
 import axios from 'axios';
 
-const searchApi = '';
+const searchApi = '/api/search';
 const { Search } = Input;
 Vue.component(Input.name, Input);
 Vue.component(Search.name, Search);
