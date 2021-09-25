@@ -7,4 +7,4 @@ build a simple tool for searching news daily meeting some demands.
 
 ### 爬虫使用Python3.9+Scrapy
 
-### 文件检索使用lucence
+### 文件检索使用lucene
