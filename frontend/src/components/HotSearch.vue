@@ -13,7 +13,10 @@
 <script>
 import Vue from 'vue';
 import { Icon } from 'ant-design-vue';
+import axios from 'axios';
 Vue.component(Icon.name, Icon);
+
+const hostSearchApi = '/api/hot-search';
 
 export default {
     name: 'HotSearch',
@@ -24,8 +27,18 @@ export default {
 			changeBatch() {
 				global.console.log('换一换');
 			},
+      getHotSearch() {
+        axios.get(hostSearchApi).then((res) => {
+          global.console.log(res);
+        }).catch((err) => {
+          global.console.log(err);
+        });
+      },
 		},
     components: {},
+    mounted() {
+      this.getHotSearch(); //加载热搜新闻
+    },
 }
 </script>
 

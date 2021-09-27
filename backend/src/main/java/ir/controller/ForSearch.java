@@ -1,6 +1,7 @@
 package ir.controller;
 
 import java.util.Map;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +14,11 @@ public class ForSearch {
   @PostMapping(value = "/search")
   public String IRetrieve(@RequestBody Map<String, String> irEntity) {
     System.out.println("收到：" + irEntity.get("content"));
+    return null;
+  }
+
+  @GetMapping(value = "/hot-search")
+  public String hotSearch() {
     return null;
   }
 }
