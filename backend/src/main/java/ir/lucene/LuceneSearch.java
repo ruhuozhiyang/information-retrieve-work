@@ -27,7 +27,7 @@ public class LuceneSearch {
   private String indexStorePath = "/Users/foiunclekay/Desktop/indexStore";
 
 //  @Value("${for.search.files}")
-  private String forSearchFiles = "/Users/foiunclekay/Desktop/files";
+  private String forSearchFiles = "/Users/foiunclekay/Desktop/searchsource";
 
   @Test
   public void createIndex() throws Exception {
@@ -65,7 +65,7 @@ public class LuceneSearch {
     Directory directory = FSDirectory.open(new File(indexStorePath).toPath());
     IndexReader indexReader = DirectoryReader.open(directory);
     IndexSearcher indexSearcher = new IndexSearcher(indexReader);
-    Query query = new TermQuery(new Term("content", "teacher"));
+    Query query = new TermQuery(new Term("content", "spring"));
     TopDocs topDocs = indexSearcher.search(query, 10);
     System.out.println("查询结果的总记录数:" + topDocs.totalHits);
 
