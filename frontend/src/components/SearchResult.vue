@@ -23,8 +23,10 @@ import axios from 'axios';
 
 const searchApi = '/api/search';
 const { Item } = List;
+const { Meta } = Item;
 Vue.component(List.name, List);
 Vue.component(Item.name, Item);
+Vue.component(Meta.name, Meta);
 
 export default {
     name: 'SearchResult',
@@ -40,7 +42,7 @@ export default {
                 content: value
             };
             axios.post(searchApi, params).then((res) => {
-                this.newsList = res.data.data | [];
+                this.newsList = res.data.data || [];
                 global.console.log(this.newsList)
             }).catch((err) => {
                 global.console.log(err);
