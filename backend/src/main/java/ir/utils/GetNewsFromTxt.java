@@ -18,6 +18,7 @@ public class GetNewsFromTxt {
     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
     String line = "";
     int count = 0;
+    String content = "";
     while (!StringUtils.isEmpty(line = bufferedReader.readLine())) {
       if (count == 0) {
         newsItem.setUrl(line);
@@ -25,11 +26,12 @@ public class GetNewsFromTxt {
       if (count == 1) {
         newsItem.setTitle(line);
       }
-      if (count == 2) {
-        newsItem.setContent(line);
+      if (count >= 2) {
+        content += line;
       }
       count ++;
     }
+    newsItem.setContent(content);
     return newsItem;
   }
 
