@@ -1,12 +1,14 @@
 <template>
-  <div class="main">
-		<div>
-			<span>News热搜</span>
-			<a :style="{ float: 'right' }" @click="changeBatch">
-				<a-icon type="sync" />
-				换一换
-			</a>
-		</div>
+  <div>
+    <div class="main">
+      <div>
+        <span>News热搜</span>
+        <a :style="{ float: 'right' }" @click="changeBatch">
+          <a-icon type="sync" />
+          换一换
+        </a>
+      </div>
+    </div>
   </div>
 </template>
 

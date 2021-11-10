@@ -1,42 +1,43 @@
 <template>
   <div>
-		<div class="title">
-			<SearchBanner :content="content" />
+	<div class="title">
+		<SearchBanner :content="content" />
+	</div>
+	<div class="result_tip">
+		找到约
+		{{ news_count }}
+		条结果（用时约
+		{{ search_time }}
+		秒）
+	</div>
+	<div :style="{ width: '100%', overflow: 'hidden' }">
+		<div class="result">
+			<a-spin :spinning="loading" size="large">
+				<a-list item-layout="vertical" :data-source="newsList" :split="false" :pagination="pagination">
+					<a-list-item slot="renderItem" slot-scope="item">
+						<a-card :hoverable="true" class="card">
+							<a :href="item.url" class="a_style">{{ item.title }}</a>
+						</a-card>
+					</a-list-item>
+				</a-list>
+			</a-spin>
 		</div>
-		<div class="result_tip">
-			找到约
-			{{ news_count }}
-			条结果（用时约
-			{{ search_time }}
-			秒）
+		<div class="right_module">
+			<a-card class="right_card" title="相关搜索">
+				搜索1
+				搜索2
+			</a-card>
 		</div>
-		<div :style="{ width: '100%', overflow: 'hidden' }">
-			<div class="result">
-				<a-spin :spinning="loading" size="large">
-					<a-list item-layout="vertical" :data-source="newsList" :split="false" :pagination="pagination">
-						<a-list-item slot="renderItem" slot-scope="item">
-							<a-card :hoverable="true" class="card">
-								<a :href="item.url" class="a_style">{{ item.title }}</a>
-							</a-card>
-						</a-list-item>
-					</a-list>
-				</a-spin>
-			</div>
-			<div class="right_module">
-				<a-card class="right_card" title="相关搜索">
-					搜索1
-					搜索2
-				</a-card>
-			</div>
-		</div>
-		<div :style="{ height: '100px' }"></div>
+	</div>
+	<Footer />
   </div>
 </template>
 
 <script>
 import Vue from 'vue';
 import { List, Spin, Card } from 'ant-design-vue'
-import SearchBanner from './SearchBanner.vue';
+import SearchBanner from './common/SearchBanner.vue';
+import Footer from './common/Footer.vue';
 import axios from 'axios';
 
 const searchApi = '/api/search';
@@ -84,7 +85,8 @@ export default {
         },
     },
     components: {
-        SearchBanner
+        SearchBanner,
+		Footer,
     },
     mounted() {
         if (this.$route.query) {

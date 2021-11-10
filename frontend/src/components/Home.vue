@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import SearchBanner from './SearchBanner.vue';
+import SearchBanner from './common/SearchBanner.vue';
 import HotSearch from './HotSearch.vue';
 
 export default {
