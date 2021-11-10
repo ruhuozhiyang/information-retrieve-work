@@ -65,7 +65,7 @@ export default {
 }
 .subPage {
     text-align: center;
-    width: 650px;
+    width: 700px;
     height: 200px;
     margin: auto;
     margin-top: 20px;
