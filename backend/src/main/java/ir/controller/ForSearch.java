@@ -32,4 +32,15 @@ public class ForSearch extends BaseController {
   public String hotSearch() {
     return null;
   }
+
+  @GetMapping(value = "/create-index")
+  public Message CreateIndex() {
+    try {
+      luceneSearch.createIndex();
+      return super.buildRestResult(true, 1, "创建成功", null);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return super.buildRestResult(false, 0, "创建失败", null);
+    }
+  }
 }
