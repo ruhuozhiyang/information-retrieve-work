@@ -24,16 +24,18 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LuceneSearch {
 
-//  @Value("${index.store.path}")
-  private String indexStorePath = "/Users/foiunclekay/Desktop/indexStore";
+  @Value("${index.store.path}")
+  private String indexStorePath;
 
-//  @Value("${for.search.files}")
-  private String forSearchFiles = "/Users/foiunclekay/Documents/GitHub/news_spider_scrapy/news_spider_scrapy/news_spider_scrapy/result_news/";
+  @Value("${for.search.files}")
+  private String forSearchFiles;
+
 
   @Test
   public void createIndex() throws Exception {
@@ -42,24 +44,26 @@ public class LuceneSearch {
     File dir = new File(forSearchFiles);
 
     File[] files = dir.listFiles();
-    for (File file:
-    files) {
-      String filepath = file.getPath();
-      NewsItem newsItem = GetNewsFromTxt.GetNewsObject(filepath);
-      String title = newsItem.getTitle();
-      String content = newsItem.getContent();
-      String url = newsItem.getUrl();
+    if (files != null) {
+      for (File file:
+      files) {
+        String filepath = file.getPath();
+        NewsItem newsItem = GetNewsFromTxt.GetNewsObject(filepath);
+        String title = newsItem.getTitle();
+        String content = newsItem.getContent();
+        String url = newsItem.getUrl();
 
-      Field website_url = new TextField("url", url, Store.YES);
-      Field website_title = new TextField("title", title, Store.YES);
-      Field website_content = new TextField("content", content, Store.YES);
+        Field website_url = new TextField("url", url, Store.YES);
+        Field website_title = new TextField("title", title, Store.YES);
+        Field website_content = new TextField("content", content, Store.YES);
 
-      Document document = new Document();
-      document.add(website_url);
-      document.add(website_title);
-      document.add(website_content);
+        Document document = new Document();
+        document.add(website_url);
+        document.add(website_title);
+        document.add(website_content);
 
-      indexWriter.addDocument(document);
+        indexWriter.addDocument(document);
+      }
     }
     indexWriter.close();
   }
@@ -76,8 +80,7 @@ public class LuceneSearch {
 
     // 取文档列表
     ScoreDoc[] scoreDocs = topDocs.scoreDocs;
-    for (ScoreDoc item:
-    scoreDocs) {
+    for (ScoreDoc item: scoreDocs) {
       int docId = item.doc;
 
       //根据文档id获取文档
