@@ -3,10 +3,13 @@ package ir.lucene;
 import ir.entity.IREntity;
 import ir.entity.NewsItem;
 import ir.utils.GetNewsFromTxt;
+import ir.utils.HighLightWord;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Store;
@@ -21,6 +24,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.junit.Test;
@@ -38,6 +42,7 @@ public class LuceneSearch {
   private String forSearchFiles;
 //  private static String forSearchFiles = "/Users/foiunclekay/Documents/GitHub/news_spider_scrapy/news_spider_scrapy/news_spider_scrapy/result_news/";
 
+  private Analyzer analyzer = new StandardAnalyzer();
 
   @Test
   public void createIndex() throws Exception {
@@ -71,7 +76,8 @@ public class LuceneSearch {
   }
 
   @Test
-  public List<IREntity> searchIndex(String field, String content) throws IOException {
+  public List<IREntity> searchIndex(String field, String content)
+      throws IOException, InvalidTokenOffsetsException {
     List<IREntity> ResultList = new ArrayList<>();
     Directory directory = FSDirectory.open(new File(indexStorePath).toPath());
     IndexReader indexReader = DirectoryReader.open(directory);
@@ -84,11 +90,11 @@ public class LuceneSearch {
     ScoreDoc[] scoreDocs = topDocs.scoreDocs;
     for (ScoreDoc item: scoreDocs) {
       int docId = item.doc;
-
       //根据文档id获取文档
       Document document = indexSearcher.doc(docId);
       String fileUrl = document.get("url");
       String fileTitle = document.get("title");
+      fileTitle = HighLightWord.getHighLightString(query, analyzer, "title", fileTitle, fileTitle.length());
       ResultList.add(IREntity.builder().title(fileTitle).url(fileUrl).build());
     }
     indexReader.close();

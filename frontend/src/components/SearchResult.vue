@@ -16,7 +16,7 @@
 				<a-list item-layout="vertical" :data-source="newsList" :split="false" :pagination="pagination">
 					<a-list-item slot="renderItem" slot-scope="item">
 						<a-card :hoverable="true" class="card">
-							<a :href="item.url" class="a_style">{{ item.title }}</a>
+							<a :href="item.url" class="a_style" v-html="item.title"></a>
 						</a-card>
 					</a-list-item>
 				</a-list>
