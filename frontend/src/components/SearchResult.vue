@@ -16,7 +16,10 @@
 				<a-list item-layout="vertical" :data-source="newsList" :split="false" :pagination="pagination">
 					<a-list-item slot="renderItem" slot-scope="item">
 						<a-card :hoverable="true" class="card">
-							<a :href="item.url" class="a_style" v-html="item.title"></a>
+							<a style="color: lightgrey">{{ urlByLevel(item.url) }}</a>
+							<div>
+								<a :href="item.url" class="a_style" v-html="item.title"></a>
+							</div>
 						</a-card>
 					</a-list-item>
 				</a-list>
@@ -39,6 +42,7 @@ import { List, Spin, Card } from 'ant-design-vue'
 import SearchBanner from './common/SearchBanner.vue';
 import Footer from './common/Footer.vue';
 import axios from 'axios';
+import { urlByLevel } from '../utils/utils';
 
 const searchApi = '/api/search';
 const { Item } = List;
@@ -69,6 +73,9 @@ export default {
         }
     },
     methods: {
+				urlByLevel(url) {
+					return urlByLevel(url)
+				},
         getNews(value) {
             this.loading = true;
             const params = {
