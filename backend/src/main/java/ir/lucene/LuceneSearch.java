@@ -1,12 +1,14 @@
 package ir.lucene;
 
 import ir.entity.IREntity;
-import ir.entity.NewsItem;
+import ir.entity.NewsItemForIndex;
+import ir.entity.SearchReturn;
 import ir.utils.GetNewsFromTxt;
 import ir.utils.HighLightWord;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -55,7 +57,7 @@ public class LuceneSearch {
       for (File file:
       files) {
         String filepath = file.getPath();
-        NewsItem newsItem = GetNewsFromTxt.GetNewsObject(filepath);
+        NewsItemForIndex newsItem = GetNewsFromTxt.GetNewsObject(filepath);
         String title = newsItem.getTitle();
         String content = newsItem.getContent();
         String url = newsItem.getUrl();
@@ -76,8 +78,9 @@ public class LuceneSearch {
   }
 
   @Test
-  public List<IREntity> searchIndex(String field, String content)
+  public SearchReturn searchIndex(String field, String content)
       throws IOException, InvalidTokenOffsetsException {
+    long t1 = new Date().getTime();
     List<IREntity> ResultList = new ArrayList<>();
     Directory directory = FSDirectory.open(new File(indexStorePath).toPath());
     IndexReader indexReader = DirectoryReader.open(directory);
@@ -98,8 +101,9 @@ public class LuceneSearch {
       ResultList.add(IREntity.builder().title(fileTitle).url(fileUrl).build());
     }
     indexReader.close();
-
-    return ResultList;
+    long t2 = new Date().getTime();
+    String cost_time = String.valueOf(t2 - t1);
+    return SearchReturn.builder().count("200").irEntities(ResultList).time(cost_time).build();
   }
 
 }

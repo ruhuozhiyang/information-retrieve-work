@@ -2,6 +2,7 @@ package ir.controller;
 
 import ir.common.Message;
 import ir.entity.IREntity;
+import ir.entity.SearchReturn;
 import ir.lucene.LuceneSearch;
 import java.io.IOException;
 import java.util.List;
@@ -24,10 +25,9 @@ public class ForSearch extends BaseController {
   @PostMapping(value = "/search")
   public Message IRetrieve(@RequestBody Map<String, String> irEntity)
       throws IOException, InvalidTokenOffsetsException {
-    System.out.println("收到：" + irEntity.get("content"));
+//    System.out.println("收到：" + irEntity.get("content"));
     String search_content = irEntity.get("content");
-    List<IREntity> irEntities = luceneSearch.searchIndex("title", search_content);
-    return super.buildRestResult(irEntities);
+    return super.buildRestResult(luceneSearch.searchIndex("title", search_content));
   }
 
   @GetMapping(value = "/hot-search")

@@ -83,7 +83,9 @@ export default {
             };
             axios.post(searchApi, params).then((res) => {
                 this.loading = false;
-                this.newsList = res.data.data || [];
+                this.newsList = res.data.data.irEntities || [];
+								this.news_count = res.data.data.count || 0;
+								this.search_time = res.data.data.time ? res.data.data.time / 1000 : 0;
                 global.console.log(this.newsList)
             }).catch((err) => {
                 this.loading = false;
