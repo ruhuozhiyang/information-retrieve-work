@@ -36,6 +36,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class LuceneSearch {
 
+  @Value("${pageSize}")
+  private int pageSize;
+
   @Value("${index.store.path}")
   private String indexStorePath;
 //  private static String indexStorePath = "/Users/foiunclekay/Desktop/indexStore";
@@ -78,7 +81,7 @@ public class LuceneSearch {
   }
 
   @Test
-  public SearchReturn searchIndex(String field, String content)
+  public SearchReturn searchIndex(String field, String content, int page)
       throws IOException, InvalidTokenOffsetsException {
     long t1 = new Date().getTime();
     List<IREntity> ResultList = new ArrayList<>();
@@ -86,13 +89,13 @@ public class LuceneSearch {
     IndexReader indexReader = DirectoryReader.open(directory);
     IndexSearcher indexSearcher = new IndexSearcher(indexReader);
     Query query = new TermQuery(new Term(field, content));
-    TopDocs topDocs = indexSearcher.search(query, 10);
+    TopDocs topDocs = indexSearcher.search(query, page * pageSize);
 //    System.out.println("查询结果的总记录数:" + topDocs.totalHits);
 
     // 取文档列表
     ScoreDoc[] scoreDocs = topDocs.scoreDocs;
-    for (ScoreDoc item: scoreDocs) {
-      int docId = item.doc;
+    for (int i = (page - 1) * pageSize; i < scoreDocs.length; i++) {
+      int docId = scoreDocs[i].doc;
       //根据文档id获取文档
       Document document = indexSearcher.doc(docId);
       String fileUrl = document.get("url");
@@ -103,7 +106,7 @@ public class LuceneSearch {
     indexReader.close();
     long t2 = new Date().getTime();
     String cost_time = String.valueOf(t2 - t1);
-    return SearchReturn.builder().count("200").irEntities(ResultList).time(cost_time).build();
+    return SearchReturn.builder().count(topDocs.totalHits).irEntities(ResultList).time(cost_time).build();
   }
 
 }

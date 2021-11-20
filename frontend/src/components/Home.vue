@@ -2,9 +2,9 @@
   <div>
       <div id="app">
         <img
-            :style="{ height: '100px' }"
-            alt="News logo"
-            src="../assets/logo.png"
+          :style="{ height: '80px' }"
+          alt="News logo"
+          src="../assets/logo.png"
         >
       </div>
       <SearchBanner />
