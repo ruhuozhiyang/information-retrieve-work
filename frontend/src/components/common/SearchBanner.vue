@@ -13,9 +13,8 @@
 <script>
 import { Input } from 'ant-design-vue';
 import Vue from 'vue';
-import axios from 'axios';
 
-const searchApi = '/api/search';
+
 const { Search } = Input;
 Vue.component(Input.name, Input);
 Vue.component(Search.name, Search);
@@ -37,14 +36,6 @@ export default {
             return
           }
           this.$router.push({ path: '/result', query: { content: this.searchValue }});
-          const params = {
-            content: value
-          };
-          axios.post(searchApi, params).then((res) => {
-            global.console.log(res);
-          }).catch((err) => {
-            global.console.log(err);
-          });
         },
     },
     mounted() {
@@ -74,7 +65,7 @@ export default {
 }
 .subPage {
     text-align: center;
-    width: 650px;
+    width: 700px;
     height: 200px;
     margin: auto;
     margin-top: 20px;
