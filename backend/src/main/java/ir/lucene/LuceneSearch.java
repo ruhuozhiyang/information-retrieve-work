@@ -1,12 +1,14 @@
 package ir.lucene;
 
 import ir.entity.IREntity;
-import ir.entity.NewsItem;
+import ir.entity.NewsItemForIndex;
+import ir.entity.SearchReturn;
 import ir.utils.GetNewsFromTxt;
 import ir.utils.HighLightWord;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -34,6 +36,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class LuceneSearch {
 
+  @Value("${pageSize}")
+  private int pageSize;
+
   @Value("${index.store.path}")
   private String indexStorePath;
 //  private static String indexStorePath = "/Users/foiunclekay/Desktop/indexStore";
@@ -55,7 +60,7 @@ public class LuceneSearch {
       for (File file:
       files) {
         String filepath = file.getPath();
-        NewsItem newsItem = GetNewsFromTxt.GetNewsObject(filepath);
+        NewsItemForIndex newsItem = GetNewsFromTxt.GetNewsObject(filepath);
         String title = newsItem.getTitle();
         String content = newsItem.getContent();
         String url = newsItem.getUrl();
@@ -76,20 +81,21 @@ public class LuceneSearch {
   }
 
   @Test
-  public List<IREntity> searchIndex(String field, String content)
+  public SearchReturn searchIndex(String field, String content, int page)
       throws IOException, InvalidTokenOffsetsException {
+    long t1 = new Date().getTime();
     List<IREntity> ResultList = new ArrayList<>();
     Directory directory = FSDirectory.open(new File(indexStorePath).toPath());
     IndexReader indexReader = DirectoryReader.open(directory);
     IndexSearcher indexSearcher = new IndexSearcher(indexReader);
     Query query = new TermQuery(new Term(field, content));
-    TopDocs topDocs = indexSearcher.search(query, 10);
+    TopDocs topDocs = indexSearcher.search(query, page * pageSize);
 //    System.out.println("查询结果的总记录数:" + topDocs.totalHits);
 
     // 取文档列表
     ScoreDoc[] scoreDocs = topDocs.scoreDocs;
-    for (ScoreDoc item: scoreDocs) {
-      int docId = item.doc;
+    for (int i = (page - 1) * pageSize; i < scoreDocs.length; i++) {
+      int docId = scoreDocs[i].doc;
       //根据文档id获取文档
       Document document = indexSearcher.doc(docId);
       String fileUrl = document.get("url");
@@ -98,8 +104,9 @@ public class LuceneSearch {
       ResultList.add(IREntity.builder().title(fileTitle).url(fileUrl).build());
     }
     indexReader.close();
-
-    return ResultList;
+    long t2 = new Date().getTime();
+    String cost_time = String.valueOf(t2 - t1);
+    return SearchReturn.builder().count(topDocs.totalHits).irEntities(ResultList).time(cost_time).build();
   }
 
 }

@@ -1,6 +1,6 @@
 package ir.utils;
 
-import ir.entity.NewsItem;
+import ir.entity.NewsItemForIndex;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,8 +10,8 @@ import java.io.InputStreamReader;
 public class GetNewsFromTxt {
 
 
-  public static NewsItem GetNewsObject(String filePath) throws IOException {
-    NewsItem newsItem = new NewsItem();
+  public static NewsItemForIndex GetNewsObject(String filePath) throws IOException {
+    NewsItemForIndex newsItem = new NewsItemForIndex();
     File fileName = new File(filePath);
     InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(fileName));
     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);

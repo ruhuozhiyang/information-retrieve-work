@@ -1,4 +1,7 @@
 const showUrlByLevel = (url) => {
+		if (!url) {
+			return
+		}
 		let l_1, l_2, l_3;
     const c = url.split('/');
     const c_p = c.filter((e) => e !== '');

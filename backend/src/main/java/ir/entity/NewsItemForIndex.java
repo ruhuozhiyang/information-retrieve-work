@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class NewsItem {
+public class NewsItemForIndex {
 
   private String url;
   private String title;

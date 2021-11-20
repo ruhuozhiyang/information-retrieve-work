@@ -64,11 +64,12 @@ export default {
 						search_time: 0.35,
 						pagination: {
 							onChange: (page) => {
-								global.console.log(page);
+								this.pagination.current = page;
+								this.getNews(this.content, page)
 							},
 							pageSize: 10,
 							current: 1,
-							total: 100,
+							total: 0,
 						}
         }
     },
@@ -76,15 +77,20 @@ export default {
 				urlByLevel(url) {
 					return urlByLevel(url)
 				},
-        getNews(value) {
+        getNews(value, currentPage) {
+					global.console.log(value + currentPage);
             this.loading = true;
             const params = {
-                content: value
+							content: value,
+							page: currentPage,
             };
             axios.post(searchApi, params).then((res) => {
                 this.loading = false;
-                this.newsList = res.data.data || [];
-                global.console.log(this.newsList)
+                this.newsList = res.data.data.irEntities || [];
+								this.news_count = res.data.data.count || 0;
+								this.pagination.total = this.news_count;
+								this.search_time = res.data.data.time ? res.data.data.time / 1000 : 0;
+                // global.console.log(this.newsList)
             }).catch((err) => {
                 this.loading = false;
                 global.console.log(err);
@@ -92,14 +98,14 @@ export default {
         },
     },
     components: {
-        SearchBanner,
-		Footer,
+      SearchBanner,
+			Footer,
     },
     mounted() {
         if (this.$route.query) {
             const { content } = this.$route.query;
             this.content = content;
-            this.getNews(content)
+            this.getNews(content, 1)
         }
     },
 }
