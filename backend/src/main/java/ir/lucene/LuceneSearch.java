@@ -3,6 +3,7 @@ package ir.lucene;
 import ir.entity.IREntity;
 import ir.entity.NewsItemForIndex;
 import ir.entity.SearchReturn;
+import ir.utils.DeleteDir;
 import ir.utils.GetNewsFromTxt;
 import ir.utils.HighLightWord;
 import java.io.File;
@@ -48,34 +49,37 @@ public class LuceneSearch {
   private Analyzer analyzer = new StandardAnalyzer();
 
   @Test
-  public void createIndex() throws Exception {
+  public Boolean createIndex() throws Exception {
+    if (!DeleteDir.DeleteDir(indexStorePath)) {
+      return false;
+    }
+    File dir = new File(forSearchFiles);
+    File[] files = dir.listFiles();
+    if (files == null) {
+      return false;
+    }
     Directory directory = FSDirectory.open(new File(indexStorePath).toPath());
     IndexWriter indexWriter = new IndexWriter(directory, new IndexWriterConfig());
-    File dir = new File(forSearchFiles);
+    for (File file: files) {
+      String filepath = file.getPath();
+      NewsItemForIndex newsItem = GetNewsFromTxt.GetNewsObject(filepath);
+      String title = newsItem.getTitle();
+      String content = newsItem.getContent();
+      String url = newsItem.getUrl();
 
-    File[] files = dir.listFiles();
-    if (files != null) {
-      for (File file:
-      files) {
-        String filepath = file.getPath();
-        NewsItemForIndex newsItem = GetNewsFromTxt.GetNewsObject(filepath);
-        String title = newsItem.getTitle();
-        String content = newsItem.getContent();
-        String url = newsItem.getUrl();
+      Field website_url = new TextField("url", url, Store.YES);
+      Field website_title = new TextField("title", title, Store.YES);
+      Field website_content = new TextField("content", content, Store.YES);
 
-        Field website_url = new TextField("url", url, Store.YES);
-        Field website_title = new TextField("title", title, Store.YES);
-        Field website_content = new TextField("content", content, Store.YES);
+      Document document = new Document();
+      document.add(website_url);
+      document.add(website_title);
+      document.add(website_content);
 
-        Document document = new Document();
-        document.add(website_url);
-        document.add(website_title);
-        document.add(website_content);
-
-        indexWriter.addDocument(document);
-      }
+      indexWriter.addDocument(document);
     }
     indexWriter.close();
+    return true;
   }
 
   @Test

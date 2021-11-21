@@ -39,8 +39,8 @@ public class ForSearch extends BaseController {
   @GetMapping(value = "/create-index")
   public Message CreateIndex() {
     try {
-      luceneSearch.createIndex();
-      return super.buildRestResult(true, 1, "创建成功", null);
+      Boolean ifSuccess = luceneSearch.createIndex();
+      return super.buildRestResult(ifSuccess, ifSuccess ? 1 : 0, ifSuccess ? "创建成功" : "创建失败", null);
     } catch (Exception e) {
       e.printStackTrace();
       return super.buildRestResult(false, 0, "创建失败", null);
