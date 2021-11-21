@@ -41,11 +41,9 @@ public class LuceneSearch {
 
   @Value("${index.store.path}")
   private String indexStorePath;
-//  private static String indexStorePath = "/Users/foiunclekay/Desktop/indexStore";
 
   @Value("${for.search.files}")
   private String forSearchFiles;
-//  private static String forSearchFiles = "/Users/foiunclekay/Documents/GitHub/news_spider_scrapy/news_spider_scrapy/news_spider_scrapy/result_news/";
 
   private Analyzer analyzer = new StandardAnalyzer();
 

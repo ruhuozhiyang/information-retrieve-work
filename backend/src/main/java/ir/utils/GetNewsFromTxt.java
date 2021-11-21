@@ -11,19 +11,20 @@ public class GetNewsFromTxt {
 
 
   public static NewsItemForIndex GetNewsObject(String filePath) throws IOException {
-    NewsItemForIndex newsItem = new NewsItemForIndex();
     File fileName = new File(filePath);
     InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(fileName));
     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
     int count = 0;
-    String content = "";
+    String content = null;
+    String url = null;
+    String title = null;
     String line = bufferedReader.readLine();;
     while (!line.equals("end")) {
       if (count == 0) {
-        newsItem.setUrl(line);
+        url = line;
       }
       if (count == 1) {
-        newsItem.setTitle(line);
+        title = line;
       }
       if (count >= 2 & !line.equals("start")) {
         content += line;
@@ -31,8 +32,7 @@ public class GetNewsFromTxt {
       count ++;
       line = bufferedReader.readLine();
     }
-    newsItem.setContent(content);
-    return newsItem;
+    return NewsItemForIndex.builder().url(url).title(title).content(content).build();
   }
 
 }
