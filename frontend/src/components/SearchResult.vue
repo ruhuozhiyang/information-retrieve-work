@@ -1,7 +1,7 @@
 <template>
   <div>
 	<div class="title">
-		<SearchBanner :content="content" />
+		<SearchBanner :content="content" @requestNews="onSearch" />
 	</div>
 	<div class="result_tip">
 		找到约
@@ -56,29 +56,34 @@ Vue.component(Card.name, Card);
 export default {
     name: 'SearchResult',
     data() {
-        return {
-            content: '',
-            newsList: [],
-            loading: false,
-						news_count: 20000,
-						search_time: 0.35,
-						pagination: {
-							onChange: (page) => {
-								this.pagination.current = page;
-								this.getNews(this.content, page)
-							},
-							pageSize: 10,
-							current: 1,
-							total: 0,
-						}
-        }
+			return {
+				content: '',
+				newsList: [],
+				loading: false,
+				news_count: 20000,
+				search_time: 0.35,
+				pagination: {
+					onChange: (page) => {
+						this.pagination.current = page;
+						this.getNews(this.content, page)
+					},
+					pageSize: 10,
+					current: 1,
+					total: 0,
+				}
+			}
     },
     methods: {
 				urlByLevel(url) {
 					return urlByLevel(url)
 				},
+				onSearch(value, currentPage) {
+					this.content = value;
+					this.pagination.current = 1;
+					this.getNews(value, currentPage);
+				},
         getNews(value, currentPage) {
-					global.console.log(value + currentPage);
+					// global.console.log(value + currentPage);
             this.loading = true;
             const params = {
 							content: value,
@@ -102,11 +107,11 @@ export default {
 			Footer,
     },
     mounted() {
-        if (this.$route.query) {
-            const { content } = this.$route.query;
-            this.content = content;
-            this.getNews(content, 1)
-        }
+			if (this.$route.query) {
+					const { content } = this.$route.query;
+					this.content = content;
+					this.getNews(content, 1)
+			}
     },
 }
 </script>
