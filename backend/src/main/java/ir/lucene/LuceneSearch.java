@@ -30,9 +30,9 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.wltea.analyzer.lucene.IKAnalyzer;
 
 @Service
 public class LuceneSearch {
@@ -46,10 +46,8 @@ public class LuceneSearch {
   @Value("${for.search.files}")
   private String forSearchFiles;
 
-  private Analyzer analyzer = new StandardAnalyzer();
-
-  @Test
   public Boolean createIndex() throws Exception {
+    Analyzer analyzer = new IKAnalyzer();
     if (!DeleteDir.DeleteDir(indexStorePath)) {
       return false;
     }
@@ -59,7 +57,7 @@ public class LuceneSearch {
       return false;
     }
     Directory directory = FSDirectory.open(new File(indexStorePath).toPath());
-    IndexWriter indexWriter = new IndexWriter(directory, new IndexWriterConfig());
+    IndexWriter indexWriter = new IndexWriter(directory, new IndexWriterConfig(analyzer));
     for (File file: files) {
       String filepath = file.getPath();
       NewsItemForIndex newsItem = GetNewsFromTxt.GetNewsObject(filepath);
@@ -82,9 +80,9 @@ public class LuceneSearch {
     return true;
   }
 
-  @Test
   public SearchReturn searchIndex(String field, String content, int page)
       throws IOException, InvalidTokenOffsetsException {
+    Analyzer analyzer = new IKAnalyzer();
     long t1 = new Date().getTime();
     List<IREntity> ResultList = new ArrayList<>();
     Directory directory = FSDirectory.open(new File(indexStorePath).toPath());

@@ -1,11 +1,8 @@
 package ir.controller;
 
 import ir.common.Message;
-import ir.entity.IREntity;
-import ir.entity.SearchReturn;
 import ir.lucene.LuceneSearch;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
 import org.springframework.beans.factory.annotation.Autowired;

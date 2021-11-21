@@ -7,7 +7,7 @@ public class DeleteDir {
   /**
    * 删除指定文件夹的内容.
    * @param path 文件夹路径.
-   * @return int. 0/文件夹不存在；1/删除成功.
+   * @return boolean. 0/文件夹不存在；1/删除成功.
    */
   public static Boolean DeleteDir(String path) {
     File file = new File(path);
