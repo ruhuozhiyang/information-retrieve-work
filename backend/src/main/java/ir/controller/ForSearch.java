@@ -1,11 +1,8 @@
 package ir.controller;
 
 import ir.common.Message;
-import ir.entity.IREntity;
-import ir.entity.SearchReturn;
 import ir.lucene.LuceneSearch;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +36,8 @@ public class ForSearch extends BaseController {
   @GetMapping(value = "/create-index")
   public Message CreateIndex() {
     try {
-      luceneSearch.createIndex();
-      return super.buildRestResult(true, 1, "创建成功", null);
+      Boolean ifSuccess = luceneSearch.createIndex();
+      return super.buildRestResult(ifSuccess, ifSuccess ? 1 : 0, ifSuccess ? "创建成功" : "创建失败", null);
     } catch (Exception e) {
       e.printStackTrace();
       return super.buildRestResult(false, 0, "创建失败", null);

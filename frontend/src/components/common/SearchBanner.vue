@@ -35,7 +35,11 @@ export default {
           if (!value) {
             return
           }
-          this.$router.push({ path: '/result', query: { content: this.searchValue }});
+          if (this.tagsChoose === 'main') {
+            this.$router.push({ path: '/result', query: { content: this.searchValue }});
+          } else if (this.tagsChoose === 'subPage') {
+            this.$emit('requestNews', this.searchValue, 1);
+          }          
         },
     },
     mounted() {

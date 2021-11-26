@@ -3,6 +3,7 @@ package ir.lucene;
 import ir.entity.IREntity;
 import ir.entity.NewsItemForIndex;
 import ir.entity.SearchReturn;
+import ir.utils.DeleteDir;
 import ir.utils.GetNewsFromTxt;
 import ir.utils.HighLightWord;
 import java.io.File;
@@ -29,9 +30,9 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.wltea.analyzer.lucene.IKAnalyzer;
 
 @Service
 public class LuceneSearch {
@@ -47,20 +48,16 @@ public class LuceneSearch {
 
   @Value("${index.store.path}")
   private String indexStorePath;
-//  private static String indexStorePath = "/Users/foiunclekay/Desktop/indexStore";
 
   @Value("${for.search.files}")
   private String forSearchFiles;
-//  private static String forSearchFiles = "/Users/foiunclekay/Documents/GitHub/news_spider_scrapy/news_spider_scrapy/news_spider_scrapy/result_news/";
 
-  private Analyzer analyzer = new StandardAnalyzer();
-
-  @Test
-  public void createIndex() throws Exception {
-    Directory directory = FSDirectory.open(new File(indexStorePath).toPath());
-    IndexWriter indexWriter = new IndexWriter(directory, new IndexWriterConfig());
+  public Boolean createIndex() throws Exception {
+    Analyzer analyzer = new IKAnalyzer();
+    if (!DeleteDir.DeleteDir(indexStorePath)) {
+      return false;
+    }
     File dir = new File(forSearchFiles);
-
     File[] files = dir.listFiles();
     if (files != null) {
       for (File file:
@@ -86,11 +83,12 @@ public class LuceneSearch {
       }
     }
     indexWriter.close();
+    return true;
   }
 
-  @Test
   public SearchReturn searchIndex(String field, String content, int page)
       throws IOException, InvalidTokenOffsetsException {
+    Analyzer analyzer = new IKAnalyzer();
     long t1 = new Date().getTime();
     List<IREntity> ResultList = new ArrayList<>();
     Directory directory = FSDirectory.open(new File(indexStorePath).toPath());

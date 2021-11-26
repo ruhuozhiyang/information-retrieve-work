@@ -11,7 +11,6 @@ import java.util.List;
 
 public class GetNewsFromTxt {
 
-
   public static List<NewsItemForIndex> GetNewsObject(String filePath) throws IOException {
     List<NewsItemForIndex> newsItems = new ArrayList<>();
     NewsItemForIndex NItem = null;
@@ -36,7 +35,6 @@ public class GetNewsFromTxt {
       count ++;
       line = bufferedReader.readLine();
     }
-   
     return newsItems;
   }
 
