@@ -37,6 +37,12 @@ import org.wltea.analyzer.lucene.IKAnalyzer;
 @Service
 public class LuceneSearch {
 
+	/*public LuceneSearch(int ps,String isp,String fsf)
+	{
+		this.pageSize=ps;
+		this.forSearchFiles=fsf;
+		this.indexStorePath=isp;
+	}*/
   @Value("${pageSize}")
   private int pageSize;
 
@@ -53,28 +59,28 @@ public class LuceneSearch {
     }
     File dir = new File(forSearchFiles);
     File[] files = dir.listFiles();
-    if (files == null) {
-      return false;
-    }
-    Directory directory = FSDirectory.open(new File(indexStorePath).toPath());
-    IndexWriter indexWriter = new IndexWriter(directory, new IndexWriterConfig(analyzer));
-    for (File file: files) {
-      String filepath = file.getPath();
-      NewsItemForIndex newsItem = GetNewsFromTxt.GetNewsObject(filepath);
-      String title = newsItem.getTitle();
-      String content = newsItem.getContent();
-      String url = newsItem.getUrl();
+    if (files != null) {
+      for (File file:
+      files) {
+        String filepath = file.getPath();
+        List<NewsItemForIndex> newsItems = GetNewsFromTxt.GetNewsObject(filepath);
+        for(int i=0;i<newsItems.size();i++) {
+        	String title = newsItems.get(i).getTitle();
+        	String content = newsItems.get(i).getContent();
+        	String url = newsItems.get(i).getUrl();
 
-      Field website_url = new TextField("url", url, Store.YES);
-      Field website_title = new TextField("title", title, Store.YES);
-      Field website_content = new TextField("content", content, Store.YES);
+        	Field website_url = new TextField("url", url, Store.YES);
+        	Field website_title = new TextField("title", title, Store.YES);
+        	Field website_content = new TextField("content", content, Store.YES);
 
-      Document document = new Document();
-      document.add(website_url);
-      document.add(website_title);
-      document.add(website_content);
+        	Document document = new Document();
+        	document.add(website_url);
+        	document.add(website_title);
+        	document.add(website_content);
 
-      indexWriter.addDocument(document);
+        	indexWriter.addDocument(document);
+        }
+      }
     }
     indexWriter.close();
     return true;
