@@ -37,12 +37,6 @@ import org.wltea.analyzer.lucene.IKAnalyzer;
 @Service
 public class LuceneSearch {
 
-	/*public LuceneSearch(int ps,String isp,String fsf)
-	{
-		this.pageSize=ps;
-		this.forSearchFiles=fsf;
-		this.indexStorePath=isp;
-	}*/
   @Value("${pageSize}")
   private int pageSize;
 
@@ -53,15 +47,16 @@ public class LuceneSearch {
   private String forSearchFiles;
 
   public Boolean createIndex() throws Exception {
-    Analyzer analyzer = new IKAnalyzer();
     if (!DeleteDir.DeleteDir(indexStorePath)) {
       return false;
     }
+    Analyzer analyzer = new IKAnalyzer();
+    Directory directory = FSDirectory.open(new File(indexStorePath).toPath());
+    IndexWriter indexWriter = new IndexWriter(directory, new IndexWriterConfig(analyzer));
     File dir = new File(forSearchFiles);
     File[] files = dir.listFiles();
     if (files != null) {
-      for (File file:
-      files) {
+      for (File file: files) {
         String filepath = file.getPath();
         List<NewsItemForIndex> newsItems = GetNewsFromTxt.GetNewsObject(filepath);
         for(int i=0;i<newsItems.size();i++) {
