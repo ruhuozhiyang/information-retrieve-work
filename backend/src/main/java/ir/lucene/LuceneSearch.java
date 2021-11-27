@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Store;
@@ -21,22 +20,31 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
+import org.apache.lucene.search.similarities.BM25Similarity;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.wltea.analyzer.lucene.IKAnalyzer;
-
 @Service
 public class LuceneSearch {
 
+	/*public LuceneSearch(int ps,String isp,String fsf)
+	{
+		this.pageSize=ps;
+		this.forSearchFiles=fsf;
+		this.indexStorePath=isp;
+	}*/
   @Value("${pageSize}")
   private int pageSize;
 
@@ -47,16 +55,16 @@ public class LuceneSearch {
   private String forSearchFiles;
 
   public Boolean createIndex() throws Exception {
-    if (!DeleteDir.DeleteDir(indexStorePath)) {
-      return false;
-    }
+	DeleteDir.DeleteDir(indexStorePath);
     Analyzer analyzer = new IKAnalyzer();
+    BM25Similarity BMSim=new BM25Similarity();
     Directory directory = FSDirectory.open(new File(indexStorePath).toPath());
-    IndexWriter indexWriter = new IndexWriter(directory, new IndexWriterConfig(analyzer));
+    IndexWriter indexWriter = new IndexWriter(directory, new IndexWriterConfig(analyzer).setSimilarity(BMSim));
     File dir = new File(forSearchFiles);
     File[] files = dir.listFiles();
     if (files != null) {
-      for (File file: files) {
+      for (File file:
+      files) {
         String filepath = file.getPath();
         List<NewsItemForIndex> newsItems = GetNewsFromTxt.GetNewsObject(filepath);
         for(int i=0;i<newsItems.size();i++) {
@@ -82,14 +90,33 @@ public class LuceneSearch {
   }
 
   public SearchReturn searchIndex(String field, String content, int page)
-      throws IOException, InvalidTokenOffsetsException {
-    Analyzer analyzer = new IKAnalyzer();
-    long t1 = new Date().getTime();
+      throws IOException, InvalidTokenOffsetsException, ParseException {
+    Query query=null;
+    char wildCardFlag=0;
+    if(content.indexOf('*')>-1)
+    	wildCardFlag=1;
+	Analyzer analyzer = new IKAnalyzer();
+	BM25Similarity BMSim=new BM25Similarity();
+	String[] multiDefaultFields=null;
+	if(field=="all") {
+		//search both title and content
+		String[] tempMultiDefaultFields = { "title","content" };
+		multiDefaultFields=tempMultiDefaultFields;
+	}
+	else
+	{
+		String[] tempMultiDefaultFields = {field};
+		multiDefaultFields=tempMultiDefaultFields;
+	}
+	MultiFieldQueryParser mfQueryParser = new MultiFieldQueryParser(multiDefaultFields, analyzer);
+	//mfQueryParser.setDefaultOperator();
+	long t1 = new Date().getTime();
     List<IREntity> ResultList = new ArrayList<>();
     Directory directory = FSDirectory.open(new File(indexStorePath).toPath());
     IndexReader indexReader = DirectoryReader.open(directory);
     IndexSearcher indexSearcher = new IndexSearcher(indexReader);
-    Query query = new TermQuery(new Term(field, content));
+    indexSearcher.setSimilarity(BMSim);
+    query=mfQueryParser.parse(content);
     TopDocs topDocs = indexSearcher.search(query, page * pageSize);
 //    System.out.println("查询结果的总记录数:" + topDocs.totalHits);
 
@@ -101,8 +128,19 @@ public class LuceneSearch {
       Document document = indexSearcher.doc(docId);
       String fileUrl = document.get("url");
       String fileTitle = document.get("title");
-      fileTitle = HighLightWord.getHighLightString(query, analyzer, "title", fileTitle, fileTitle.length());
-      ResultList.add(IREntity.builder().title(fileTitle).url(fileUrl).build());
+      String fileContent = document.get("content");
+      String fileSummary=null;
+      if(wildCardFlag==1)
+      {
+    	  String tempcontent=new String(content).replace('*', ' ');
+    	  Query tempQuery=mfQueryParser.parse(tempcontent);
+    	  fileSummary=HighLightWord.getHighLightStringWild(tempQuery, analyzer, "content", fileContent, 100);
+          fileTitle = HighLightWord.getHighLightStringWild(tempQuery, analyzer, "title", fileTitle, fileTitle.length());
+      }else {
+    	  fileSummary=HighLightWord.getHighLightString(query, analyzer, "content", fileContent, 100);
+    	  fileTitle = HighLightWord.getHighLightString(query, analyzer, "title", fileTitle, fileTitle.length());
+      }
+      ResultList.add(IREntity.builder().title(fileTitle).url(fileUrl).summary(fileSummary).build());
     }
     indexReader.close();
     long t2 = new Date().getTime();
