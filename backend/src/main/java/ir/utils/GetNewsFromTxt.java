@@ -18,18 +18,25 @@ public class GetNewsFromTxt {
     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
     int count = 0;
     String line = bufferedReader.readLine();
-    String url = "", title = "", content = "";
-    while (line!=null) {
-      if (count%3 == 0) {
+    String url = null, title = null, content = null, time = null, source_website;
+    while (line != null) {
+      if (count%5 == 0) {
         url = line;
       }
-      if (count%3 == 1) {
+      if (count%5 == 1) {
         title = line;
       }
-      if (count%3==2) {
+      if (count%5 == 2) {
         content = line;
+      }
+      if (count%5 == 3) {
+        time = line;
+      }
+      if (count%5 == 4) {
+        source_website = line;
         newsItems.add(
-            NewsItemForIndex.builder().url(url).title(title).content(content).build()
+            NewsItemForIndex.builder().url(url).title(title)
+                .content(content).time(time).source_website(source_website).build()
         );
       }
       count ++;

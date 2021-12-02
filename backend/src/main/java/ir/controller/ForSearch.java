@@ -4,6 +4,7 @@ import ir.common.Message;
 import ir.lucene.LuceneSearch;
 import java.io.IOException;
 import java.util.Map;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +22,7 @@ public class ForSearch extends BaseController {
 
   @PostMapping(value = "/search")
   public Message IRetrieve(@RequestBody Map<String, String> irEntity)
-      throws IOException, InvalidTokenOffsetsException {
+      throws IOException, InvalidTokenOffsetsException, ParseException {
     String search_content = irEntity.get("content");
     int page = new Integer(irEntity.get("page"));
     System.out.println("收到：" + page);

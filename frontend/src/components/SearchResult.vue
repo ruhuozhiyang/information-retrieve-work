@@ -17,9 +17,11 @@
 					<a-list-item slot="renderItem" slot-scope="item">
 						<a-card :hoverable="true" class="card">
 							<a style="color: lightgrey">{{ urlByLevel(item.url) }}</a>
-							<div>
-								<a :href="item.url" class="a_style" v-html="item.title"></a>
+							<div class="result_card">
+								<a :href="item.url" class="a_style" v-html="item.title + ' -' + item.source_website"></a>
 							</div>
+							<div class="result_card" v-html="getSummary(item.time, item.summary)"></div>
+							<!-- <div class="result_card">发布时间:{{}}</div> -->
 						</a-card>
 					</a-list-item>
 				</a-list>
@@ -42,7 +44,7 @@ import { List, Spin, Card } from 'ant-design-vue'
 import SearchBanner from './common/SearchBanner.vue';
 import Footer from './common/Footer.vue';
 import axios from 'axios';
-import { urlByLevel } from '../utils/utils';
+import { urlByLevel, getTime } from '../utils/utils';
 
 const searchApi = '/api/search';
 const { Item } = List;
@@ -74,33 +76,44 @@ export default {
 			}
     },
     methods: {
-				urlByLevel(url) {
-					return urlByLevel(url)
-				},
-				onSearch(value, currentPage) {
-					this.content = value;
-					this.pagination.current = 1;
-					this.getNews(value, currentPage);
-				},
-        getNews(value, currentPage) {
-					// global.console.log(value + currentPage);
-            this.loading = true;
-            const params = {
-							content: value,
-							page: currentPage,
-            };
-            axios.post(searchApi, params).then((res) => {
-                this.loading = false;
-                this.newsList = res.data.data.irEntities || [];
-								this.news_count = res.data.data.count || 0;
-								this.pagination.total = this.news_count;
-								this.search_time = res.data.data.time ? res.data.data.time / 1000 : 0;
-                // global.console.log(this.newsList)
-            }).catch((err) => {
-                this.loading = false;
-                global.console.log(err);
-            });
-        },
+			getSummary(t, s) {
+				let s1 = '';
+				let t1 = '<span style="color: grey;">' + this.getTime(t) + '——' + '</span>';
+				s1 = t1 + (s || '') + '...'
+				return s1
+			},
+			getTime(t) {
+				if (t.indexOf('-') > 0) {
+					return getTime(t, '-')
+				}
+			},
+			urlByLevel(url) {
+				return urlByLevel(url)
+			},
+			onSearch(value, currentPage) {
+				this.content = value;
+				this.pagination.current = 1;
+				this.getNews(value, currentPage);
+			},
+			getNews(value, currentPage) {
+				// global.console.log(value + currentPage);
+					this.loading = true;
+					const params = {
+						content: value,
+						page: currentPage,
+					};
+					axios.post(searchApi, params).then((res) => {
+							this.loading = false;
+							this.newsList = res.data.data.irEntities || [];
+							this.news_count = res.data.data.count || 0;
+							this.pagination.total = this.news_count;
+							this.search_time = res.data.data.time ? res.data.data.time / 1000 : 0;
+							// global.console.log(this.newsList)
+					}).catch((err) => {
+							this.loading = false;
+							global.console.log(err);
+					});
+			},
     },
     components: {
       SearchBanner,
@@ -146,6 +159,10 @@ export default {
 	font-size: 18px;
 }
 .result_tip {
+	margin-top: 5px;
 	margin-left: 150px;
+}
+.result_card {
+	margin-top: 5px;
 }
 </style>
