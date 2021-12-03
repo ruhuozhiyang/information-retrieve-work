@@ -45,9 +45,6 @@ export default {
         }
     },
     methods: {
-      clickIcon() {
-        global.console.log('icon');
-      },
       getComplete(v) {
         this.auto_complete_data = !v ? [] : [v, v.repeat(2), v.repeat(3)];
       },

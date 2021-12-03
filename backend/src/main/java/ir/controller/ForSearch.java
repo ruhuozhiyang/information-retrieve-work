@@ -25,8 +25,9 @@ public class ForSearch extends BaseController {
       throws IOException, InvalidTokenOffsetsException, ParseException {
     String search_content = irEntity.get("content");
     int page = new Integer(irEntity.get("page"));
-    System.out.println("收到：" + page);
-    return super.buildRestResult(luceneSearch.searchIndex("title", search_content, page));
+    String sort_s = irEntity.get("sort");
+    System.out.println("收到：" + sort_s);
+    return super.buildRestResult(luceneSearch.searchIndex("title", search_content, page, sort_s));
   }
 
   @GetMapping(value = "/hot-search")

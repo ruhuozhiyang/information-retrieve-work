@@ -1,50 +1,50 @@
 <template>
   <div>
-	<div class="title">
-		<SearchBanner :content="content" @requestNews="onSearch" />
-	</div>
-	<div class="result_tip">
-		<span v-if="tool">找到约{{ news_count }}条结果（用时约{{ search_time }}秒）</span>
-		<span v-else>
-			<a-select default-value="relevance" style="width: 100px" @change="handleChange">
-				<a-select-option value="relevance">
-					按相关度
-				</a-select-option>
-				<a-select-option value="time">
-					按时间
-				</a-select-option>
-				<a-select-option value="heat">
-					按热度
-				</a-select-option>
-			</a-select>
-		</span>
-		<a-button style="float: right;" @click="setTools">工具</a-button>
-	</div>
-	<div :style="{ width: '100%', overflow: 'hidden' }">
-		<div class="result">
-			<a-spin :spinning="loading" size="large">
-				<a-list item-layout="vertical" :data-source="newsList" :split="false" :pagination="pagination">
-					<a-list-item slot="renderItem" slot-scope="item">
-						<a-card :hoverable="true" class="card">
-							<a style="color: lightgrey">{{ urlByLevel(item.url) }}</a>
-							<div class="result_card">
-								<a :href="item.url" class="a_style" v-html="item.title + ' -' + item.source_website"></a>
-							</div>
-							<div class="result_card" v-html="getSummary(item.time, item.summary)"></div>
-							<!-- <div class="result_card">发布时间:{{}}</div> -->
-						</a-card>
-					</a-list-item>
-				</a-list>
-			</a-spin>
+		<div class="title">
+			<SearchBanner :content="content" @requestNews="onSearch" />
 		</div>
-		<div class="right_module">
-			<a-card class="right_card" title="相关搜索">
-				搜索1
-				搜索2
-			</a-card>
+		<div class="result_tip">
+			<span v-if="tool">找到约{{ news_count }}条结果（用时约{{ search_time }}秒）</span>
+			<span v-else>
+				<a-select default-value="r" style="width: 100px" @change="handleChange">
+					<a-select-option value="r">
+						按相关度
+					</a-select-option>
+					<a-select-option value="t">
+						按时间
+					</a-select-option>
+					<a-select-option value="h">
+						按热度
+					</a-select-option>
+				</a-select>
+			</span>
+			<a-button style="float: right;" @click="setTools" :type="tool ? '' : 'primary'">工具</a-button>
 		</div>
-	</div>
-	<Footer />
+		<div :style="{ width: '100%', overflow: 'hidden' }">
+			<div class="result">
+				<a-spin :spinning="loading" size="large">
+					<a-list item-layout="vertical" :data-source="newsList" :split="false" :pagination="pagination">
+						<a-list-item slot="renderItem" slot-scope="item">
+							<a-card :hoverable="true" class="card">
+								<a style="color: lightgrey">{{ urlByLevel(item.url) }}</a>
+								<div class="result_card">
+									<a :href="item.url" class="a_style" v-html="item.title + ' -' + item.source_website"></a>
+								</div>
+								<div class="result_card" v-html="getSummary(item.time, item.summary)"></div>
+								<!-- <div class="result_card">发布时间:{{}}</div> -->
+							</a-card>
+						</a-list-item>
+					</a-list>
+				</a-spin>
+			</div>
+			<div class="right_module">
+				<a-card class="right_card" title="相关搜索">
+					搜索1
+					搜索2
+				</a-card>
+			</div>
+		</div>
+		<Footer />
   </div>
 </template>
 
@@ -82,25 +82,28 @@ export default {
 				pagination: {
 					onChange: (page) => {
 						this.pagination.current = page;
-						this.getNews(this.content, page)
+						this.getNews(this.content, page, this.sort)
 					},
 					pageSize: 10,
 					current: 1,
 					total: 0,
 				},
-				tool: true
+				tool: true,
+				sort: 'r',
 			}
     },
     methods: {
-			handleChange() {
-
+			handleChange(s) {
+				this.sort = s;
+				this.getNews(this.content, 1, s)
 			},
 			setTools() {
+				this.sort = 'r';
 				this.tool = !this.tool;
 			},
 			getSummary(t, s) {
 				let s1 = '';
-				let t1 = '<span style="color: grey;">' + this.getTime(t) + '——' + '</span>';
+				let t1 = '<span style="color: grey;">' + t + '——' + '</span>';
 				s1 = t1 + (s || '') + '...'
 				return s1
 			},
@@ -115,26 +118,29 @@ export default {
 			onSearch(value, currentPage) {
 				this.content = value;
 				this.pagination.current = 1;
-				this.getNews(value, currentPage);
+				this.getNews(value, currentPage, this.sort);
 			},
-			getNews(value, currentPage) {
-				// global.console.log(value + currentPage);
-					this.loading = true;
-					const params = {
-						content: value,
-						page: currentPage,
-					};
-					axios.post(searchApi, params).then((res) => {
-							this.loading = false;
-							this.newsList = res.data.data.irEntities || [];
-							this.news_count = res.data.data.count || 0;
-							this.pagination.total = this.news_count;
-							this.search_time = res.data.data.time ? res.data.data.time / 1000 : 0;
-							// global.console.log(this.newsList)
-					}).catch((err) => {
-							this.loading = false;
-							global.console.log(err);
-					});
+			getNews(value, currentPage, s) {
+				if (!s) {
+					s = 'r'
+				}
+				this.loading = true;
+				const params = {
+					content: value,
+					page: currentPage,
+					sort: s
+				};
+				axios.post(searchApi, params).then((res) => {
+						this.loading = false;
+						this.newsList = res.data.data.irEntities || [];
+						this.news_count = res.data.data.count || 0;
+						this.pagination.total = this.news_count;
+						this.search_time = res.data.data.time ? res.data.data.time / 1000 : 0;
+						// global.console.log(this.newsList)
+				}).catch((err) => {
+						this.loading = false;
+						global.console.log(err);
+				});
 			},
     },
     components: {

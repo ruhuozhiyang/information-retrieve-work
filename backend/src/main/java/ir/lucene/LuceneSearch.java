@@ -15,6 +15,10 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.LongPoint;
+import org.apache.lucene.document.NumericDocValuesField;
+import org.apache.lucene.document.SortedDocValuesField;
+import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -23,6 +27,9 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
+import org.apache.lucene.search.SortField.Type;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
 import org.apache.lucene.search.similarities.BM25Similarity;
@@ -30,9 +37,11 @@ import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.BytesRef;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.wltea.analyzer.lucene.IKAnalyzer;
+
 @Service
 public class LuceneSearch {
 
@@ -45,6 +54,11 @@ public class LuceneSearch {
   @Value("${for.search.files}")
   private String forSearchFiles;
 
+  /**
+   * 创建索引.
+   * @return 是否创建成功.
+   * @throws Exception exception.
+   */
   public Boolean createIndex() throws Exception {
 	  DeleteDir.DeleteDir(indexStorePath);
     Analyzer analyzer = new IKAnalyzer();
@@ -67,7 +81,7 @@ public class LuceneSearch {
         	Field website_url = new TextField("url", url, Store.YES);
         	Field website_title = new TextField("title", title, Store.YES);
         	Field website_content = new TextField("content", content, Store.YES);
-          Field website_time = new TextField("time", time, Store.YES);
+          Field website_time = new SortedDocValuesField("time", new BytesRef(time));
           Field website_source = new TextField("source", source_website, Store.YES);
 
         	Document document = new Document();
@@ -75,6 +89,7 @@ public class LuceneSearch {
         	document.add(website_title);
         	document.add(website_content);
         	document.add(website_time);
+        	document.add(new StoredField("time", time));
         	document.add(website_source);
 
         	indexWriter.addDocument(document);
@@ -85,8 +100,20 @@ public class LuceneSearch {
     return true;
   }
 
-  public SearchReturn searchIndex(String field, String content, int page)
+  /**
+   * 查询内容.
+   * @param field 查询的域.
+   * @param content 搜索内容.
+   * @param page 起始页.
+   * @param sort_s 排序标准, 按r, t, h.
+   * @return 搜索结果.
+   * @throws IOException io exception.
+   * @throws InvalidTokenOffsetsException InvalidTokenOffsetsException.
+   * @throws ParseException ParseException.
+   */
+  public SearchReturn searchIndex(String field, String content, int page, String sort_s)
       throws IOException, InvalidTokenOffsetsException, ParseException {
+    long t1 = new Date().getTime();
     Query query;
     char wildCardFlag = (char) (content.indexOf('*') > -1 ? 1 : 0);
     Analyzer analyzer = new IKAnalyzer();
@@ -97,14 +124,18 @@ public class LuceneSearch {
     multiDefaultFields=tempMultiDefaultFields;
     MultiFieldQueryParser mfQueryParser = new MultiFieldQueryParser(multiDefaultFields, analyzer);
 	  //mfQueryParser.setDefaultOperator();
-	  long t1 = new Date().getTime();
     List<IREntity> ResultList = new ArrayList<>();
     Directory directory = FSDirectory.open(new File(indexStorePath).toPath());
     IndexReader indexReader = DirectoryReader.open(directory);
     IndexSearcher indexSearcher = new IndexSearcher(indexReader);
     indexSearcher.setSimilarity(BMSim);
-    query=mfQueryParser.parse(content);
-    TopDocs topDocs = indexSearcher.search(query, page * pageSize);
+    query = mfQueryParser.parse(content);
+    TopDocs topDocs = null;
+    if (sort_s.equals("t")) {
+      topDocs = indexSearcher.search(query, page * pageSize, new Sort(new SortField("time", Type.STRING, true)));
+    } else {
+      topDocs = indexSearcher.search(query, page * pageSize);
+    }
 
     // 取文档列表
     ScoreDoc[] scoreDocs = topDocs.scoreDocs;
@@ -119,12 +150,12 @@ public class LuceneSearch {
       String source_website = document.get("source");
       String fileSummary;
       if(wildCardFlag == 1) {
-    	  String temp_content= content.replace('*', ' ');
-    	  Query tempQuery=mfQueryParser.parse(temp_content);
-    	  fileSummary=HighLightWord.getHighLightStringWild(tempQuery, analyzer, "content", fileContent, 100);
-          fileTitle = HighLightWord.getHighLightStringWild(tempQuery, analyzer, "title", fileTitle, fileTitle.length());
+    	  String temp_content = content.replace('*', ' ');
+    	  Query tempQuery = mfQueryParser.parse(temp_content);
+    	  fileSummary = HighLightWord.getHighLightStringWild(tempQuery, analyzer, "content", fileContent, 100);
+    	  fileTitle = HighLightWord.getHighLightStringWild(tempQuery, analyzer, "title", fileTitle, fileTitle.length());
       } else {
-    	  fileSummary=HighLightWord.getHighLightString(query, analyzer, "content", fileContent, 100);
+    	  fileSummary = HighLightWord.getHighLightString(query, analyzer, "content", fileContent, 100);
     	  fileTitle = HighLightWord.getHighLightString(query, analyzer, "title", fileTitle, fileTitle.length());
       }
       ResultList.add(IREntity.builder().title(fileTitle).url(fileUrl)
