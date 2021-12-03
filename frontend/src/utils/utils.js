@@ -26,7 +26,7 @@ const showUrlByLevel = (url) => {
 }
 
 const getCTime = (time, flag) => {
-	let t = time;
+	let t = trim(time);
 	if (flag === '-') {
 		let temp = '';
 		let appendix = ['年', '月', '日'];
@@ -37,6 +37,17 @@ const getCTime = (time, flag) => {
 		t = temp;
 	}
 	return t;
+}
+
+const trim = (s) => {
+	if (s == null) return "" ;
+	while ( s.charAt(0)  == ' ') {
+		s = s.substring(1, s.length);
+	}
+	while (s.charAt(s.length - 1)  == ' ') {
+		s = s.substring(0, s.length - 1);
+	}
+	return s;
 }
 
 export const urlByLevel = showUrlByLevel;

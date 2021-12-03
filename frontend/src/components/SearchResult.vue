@@ -103,7 +103,7 @@ export default {
 			},
 			getSummary(t, s) {
 				let s1 = '';
-				let t1 = '<span style="color: grey;">' + t + '——' + '</span>';
+				let t1 = '<span style="color: grey;">' + this.getTime(t) + '——' + '</span>';
 				s1 = t1 + (s || '') + '...'
 				return s1
 			},
