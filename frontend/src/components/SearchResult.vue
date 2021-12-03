@@ -4,11 +4,21 @@
 		<SearchBanner :content="content" @requestNews="onSearch" />
 	</div>
 	<div class="result_tip">
-		找到约
-		{{ news_count }}
-		条结果（用时约
-		{{ search_time }}
-		秒）
+		<span v-if="tool">找到约{{ news_count }}条结果（用时约{{ search_time }}秒）</span>
+		<span v-else>
+			<a-select default-value="relevance" style="width: 100px" @change="handleChange">
+				<a-select-option value="relevance">
+					按相关度
+				</a-select-option>
+				<a-select-option value="time">
+					按时间
+				</a-select-option>
+				<a-select-option value="heat">
+					按热度
+				</a-select-option>
+			</a-select>
+		</span>
+		<a-button style="float: right;" @click="setTools">工具</a-button>
 	</div>
 	<div :style="{ width: '100%', overflow: 'hidden' }">
 		<div class="result">
@@ -40,7 +50,7 @@
 
 <script>
 import Vue from 'vue';
-import { List, Spin, Card } from 'ant-design-vue'
+import { List, Spin, Card, Button, Select } from 'ant-design-vue'
 import SearchBanner from './common/SearchBanner.vue';
 import Footer from './common/Footer.vue';
 import axios from 'axios';
@@ -49,11 +59,16 @@ import { urlByLevel, getTime } from '../utils/utils';
 const searchApi = '/api/search';
 const { Item } = List;
 const { Meta } = Item;
+const { Option } = Select;
 Vue.component(List.name, List);
 Vue.component(Item.name, Item);
 Vue.component(Meta.name, Meta);
 Vue.component(Spin.name, Spin);
 Vue.component(Card.name, Card);
+Vue.component(Button.name, Button)
+Vue.component(Select.name, Select)
+Vue.component(Option.name, Option);
+
 
 export default {
     name: 'SearchResult',
@@ -72,10 +87,17 @@ export default {
 					pageSize: 10,
 					current: 1,
 					total: 0,
-				}
+				},
+				tool: true
 			}
     },
     methods: {
+			handleChange() {
+
+			},
+			setTools() {
+				this.tool = !this.tool;
+			},
 			getSummary(t, s) {
 				let s1 = '';
 				let t1 = '<span style="color: grey;">' + this.getTime(t) + '——' + '</span>';
@@ -159,6 +181,7 @@ export default {
 	font-size: 18px;
 }
 .result_tip {
+	width: 700px;
 	margin-top: 5px;
 	margin-left: 150px;
 }

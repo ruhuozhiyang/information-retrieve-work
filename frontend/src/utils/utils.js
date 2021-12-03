@@ -14,7 +14,11 @@ const showUrlByLevel = (url) => {
 	if (c_p.length >= 4) {
 		for (let i = 3; i < c_p.length; i++) {
 			if (c_p[i].indexOf('.html') > -1) {
-				l_3 = ' > ' + c_p[i];
+				l_3 = ' > '
+				if (i > 3) {
+					l_3 += c_p[i - 1] + ' / ';
+				}
+				l_3 += c_p[i];
 			}
 		}
 	}
