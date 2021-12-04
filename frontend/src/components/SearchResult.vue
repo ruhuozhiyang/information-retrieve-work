@@ -54,7 +54,7 @@ import { List, Spin, Card, Button, Select } from 'ant-design-vue'
 import SearchBanner from './common/SearchBanner.vue';
 import Footer from './common/Footer.vue';
 import axios from 'axios';
-import { urlByLevel, getTime } from '../utils/utils';
+import { urlByLevel, getTime, r_history } from '../utils/utils';
 
 const searchApi = '/api/search';
 const { Item } = List;
@@ -121,6 +121,7 @@ export default {
 				this.getNews(value, currentPage, this.sort);
 			},
 			getNews(value, currentPage, s) {
+				r_history('n_r', value);
 				if (!s) {
 					s = 'r'
 				}

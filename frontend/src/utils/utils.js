@@ -1,3 +1,5 @@
+import { g_session, r_session, s_session } from "./session";
+
 const showUrlByLevel = (url) => {
 	if (!url) {
 		return
@@ -50,5 +52,39 @@ const trim = (s) => {
 	return s;
 }
 
+const record_history = (k, v) => {
+	let c_h = g_session(k);
+	if (!c_h) {
+		let t = [];
+		t.push(v)
+		s_session(k, t);
+		return
+	}
+	if (c_h.indexOf(v) > -1) {
+		return
+	}
+	r_session(k);
+	c_h.push(v);
+	s_session(k, c_h);
+	return
+}
+
+const get_history = (k) => {
+	return g_session(k);
+}
+
+const remove_history = (k, v) => {
+	let c_h = g_session(k);
+	let index = c_h.indexOf(v);
+	c_h.splice(index, 1);
+	r_session(k);
+	if (c_h.length > 0) {
+		s_session(k, c_h);
+	}
+}
+
 export const urlByLevel = showUrlByLevel;
 export const getTime = getCTime;
+export const r_history = record_history;
+export const g_history = get_history;
+export const m_history = remove_history;

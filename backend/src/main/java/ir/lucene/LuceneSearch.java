@@ -15,8 +15,6 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.LongPoint;
-import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.TextField;
@@ -71,7 +69,7 @@ public class LuceneSearch {
       for (File file: files) {
         String filepath = file.getPath();
         List<NewsItemForIndex> newsItems = GetNewsFromTxt.GetNewsObject(filepath);
-        for(int i=0;i<newsItems.size();i++) {
+        for(int i=0; i < newsItems.size(); i++) {
         	String title = newsItems.get(i).getTitle();
         	String content = newsItems.get(i).getContent();
         	String url = newsItems.get(i).getUrl();
@@ -117,11 +115,11 @@ public class LuceneSearch {
     Query query;
     char wildCardFlag = (char) (content.indexOf('*') > -1 ? 1 : 0);
     Analyzer analyzer = new IKAnalyzer();
-	  BM25Similarity BMSim=new BM25Similarity();
+	  BM25Similarity BMSim = new BM25Similarity();
 	  String[] multiDefaultFields;
     String[] tempMultiDefaultFields = field == "all" ? new String[]{"title", "content"} : new String[]{field};
 
-    multiDefaultFields=tempMultiDefaultFields;
+    multiDefaultFields = tempMultiDefaultFields;
     MultiFieldQueryParser mfQueryParser = new MultiFieldQueryParser(multiDefaultFields, analyzer);
 	  //mfQueryParser.setDefaultOperator();
     List<IREntity> ResultList = new ArrayList<>();
@@ -130,7 +128,7 @@ public class LuceneSearch {
     IndexSearcher indexSearcher = new IndexSearcher(indexReader);
     indexSearcher.setSimilarity(BMSim);
     query = mfQueryParser.parse(content);
-    TopDocs topDocs = null;
+    TopDocs topDocs;
     if (sort_s.equals("t")) {
       topDocs = indexSearcher.search(query, page * pageSize, new Sort(new SortField("time", Type.STRING, true)));
     } else {
