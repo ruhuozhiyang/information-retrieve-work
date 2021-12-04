@@ -7,15 +7,9 @@
 			<span v-if="tool">找到约{{ news_count }}条结果（用时约{{ search_time }}秒）</span>
 			<span v-else>
 				<a-select default-value="r" style="width: 100px" @change="handleChange">
-					<a-select-option value="r">
-						按相关度
-					</a-select-option>
-					<a-select-option value="t">
-						按时间
-					</a-select-option>
-					<a-select-option value="h">
-						按热度
-					</a-select-option>
+					<a-select-option value="r">按相关度</a-select-option>
+					<a-select-option value="t">按时间</a-select-option>
+					<a-select-option value="h">按热度</a-select-option>
 				</a-select>
 			</span>
 			<a-button style="float: right;" @click="setTools" :type="tool ? '' : 'primary'">工具</a-button>
@@ -132,15 +126,15 @@ export default {
 					sort: s
 				};
 				axios.post(searchApi, params).then((res) => {
-						this.loading = false;
-						this.newsList = res.data.data.irEntities || [];
-						this.news_count = res.data.data.count || 0;
-						this.pagination.total = this.news_count;
-						this.search_time = res.data.data.time ? res.data.data.time / 1000 : 0;
-						// global.console.log(this.newsList)
+					this.loading = false;
+					this.newsList = res.data.data.irEntities || [];
+					this.news_count = res.data.data.count || 0;
+					this.pagination.total = this.news_count;
+					this.search_time = res.data.data.time ? res.data.data.time / 1000 : 0;
+					// global.console.log(this.newsList)
 				}).catch((err) => {
-						this.loading = false;
-						global.console.log(err);
+					this.loading = false;
+					global.console.log(err);
 				});
 			},
     },

@@ -16,8 +16,11 @@
           <span slot="label">
             {{ c_group.title }}
           </span>
-          <a-select-option v-for="e in c_group.children" :key="e" :value="e">{{ e }}
-            <a-icon style="float: right;" type="close" @click="r_h_item(e)" />
+          <a-select-option v-for="e in c_group.children" :key="e" :value="e">
+            <span @click.stop>
+              {{ e }}
+              <a-icon style="float: right;" type="close" @click="r_h_item(e)" />
+            </span>
           </a-select-option>
         </a-select-opt-group>
       </template>

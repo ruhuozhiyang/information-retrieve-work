@@ -23,7 +23,7 @@ const hostSearchApi = '/api/hot-search';
 export default {
     name: 'HotSearch',
     data() {
-        return {}
+      return {}
     },
     methods: {
 			changeBatch() {
