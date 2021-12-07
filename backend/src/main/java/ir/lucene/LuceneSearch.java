@@ -1,16 +1,21 @@
 package ir.lucene;
 
+import ir.entity.HotNews;
 import ir.entity.IREntity;
 import ir.entity.NewsItemForIndex;
 import ir.entity.SearchReturn;
+import ir.mapper.LuceneSearchMapper;
 import ir.utils.DeleteDir;
 import ir.utils.GetNewsFromTxt;
 import ir.utils.HighLightWord;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
+import javax.annotation.Resource;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -52,12 +57,42 @@ public class LuceneSearch {
   @Value("${for.search.files}")
   private String forSearchFiles;
 
+  @Value("${hot_news_count}")
+  private int HotNewsCount;
+
+  @Resource
+  private LuceneSearchMapper lSMapper;
+
+  private List<HotNews> hot_news = new ArrayList<>(HotNewsCount);
+  private List<Integer> heat_t_l = new ArrayList<>(HotNewsCount);
+
+  private void SetHotNewsObj(int t_h, String heat, String title, String url) {
+    if (hot_news.size() < HotNewsCount) {
+      hot_news.add(new HotNews(heat, title, url));
+      heat_t_l.add(t_h);
+    } else {
+      int min_h = Collections.min(heat_t_l);
+      if (t_h > min_h) {
+        for (HotNews e: hot_news) {
+          if (e.getHeat().equals(String.valueOf(min_h))) {
+            heat_t_l.remove(heat_t_l.indexOf(min_h));
+            heat_t_l.add(t_h);
+            hot_news.remove(e);
+            hot_news.add(new HotNews(heat, title, url));
+            break;
+          }
+        }
+      }
+    }
+  }
+
   /**
    * 创建索引.
    * @return 是否创建成功.
    * @throws Exception exception.
    */
   public Boolean createIndex() throws Exception {
+    Random r = new Random();
 	  DeleteDir.DeleteDir(indexStorePath);
     Analyzer analyzer = new IKAnalyzer();
     BM25Similarity BMSim=new BM25Similarity();
@@ -81,7 +116,10 @@ public class LuceneSearch {
         	Field website_content = new TextField("content", content, Store.YES);
           Field website_time = new SortedDocValuesField("time", new BytesRef(time));
           Field website_source = new TextField("source", source_website, Store.YES);
-
+          int t_h = r.nextInt(10000);
+          String heat = String.valueOf(t_h);
+          Field website_heat = new SortedDocValuesField("heat", new BytesRef(heat));
+          SetHotNewsObj(t_h, heat, title, url);
         	Document document = new Document();
         	document.add(website_url);
         	document.add(website_title);
@@ -89,12 +127,14 @@ public class LuceneSearch {
         	document.add(website_time);
         	document.add(new StoredField("time", time));
         	document.add(website_source);
-
+        	document.add(website_heat);
+        	document.add(new StoredField("heat", heat));
         	indexWriter.addDocument(document);
         }
       }
     }
     indexWriter.close();
+    lSMapper.RecordHotNews(hot_news);
     return true;
   }
 
@@ -131,6 +171,8 @@ public class LuceneSearch {
     TopDocs topDocs;
     if (sort_s.equals("t")) {
       topDocs = indexSearcher.search(query, page * pageSize, new Sort(new SortField("time", Type.STRING, true)));
+    } else if (sort_s.equals("h")) {
+      topDocs = indexSearcher.search(query, page * pageSize, new Sort(new SortField("heat", Type.STRING, true)));
     } else {
       topDocs = indexSearcher.search(query, page * pageSize);
     }
@@ -138,14 +180,14 @@ public class LuceneSearch {
     // 取文档列表
     ScoreDoc[] scoreDocs = topDocs.scoreDocs;
     for (int i = (page - 1) * pageSize; i < scoreDocs.length; i++) {
-      int docId = scoreDocs[i].doc;
       //根据文档id获取文档
-      Document document = indexSearcher.doc(docId);
+      Document document = indexSearcher.doc(scoreDocs[i].doc);
       String fileUrl = document.get("url");
       String fileTitle = document.get("title");
       String fileContent = document.get("content");
       String time = document.get("time");
       String source_website = document.get("source");
+      String heat = document.get("heat");
       String fileSummary;
       if(wildCardFlag == 1) {
     	  String temp_content = content.replace('*', ' ');
@@ -156,7 +198,7 @@ public class LuceneSearch {
     	  fileSummary = HighLightWord.getHighLightString(query, analyzer, "content", fileContent, 100);
     	  fileTitle = HighLightWord.getHighLightString(query, analyzer, "title", fileTitle, fileTitle.length());
       }
-      ResultList.add(IREntity.builder().title(fileTitle).url(fileUrl)
+      ResultList.add(IREntity.builder().title(fileTitle).url(fileUrl).heat(heat)
           .summary(fileSummary).time(time).source_website(source_website).build());
     }
     indexReader.close();
@@ -165,4 +207,11 @@ public class LuceneSearch {
     return SearchReturn.builder().count(topDocs.totalHits).irEntities(ResultList).time(cost_time).build();
   }
 
+  /**
+   * 获取前HotNewsCount名热度新闻.
+   * @return searchReturn.
+   */
+  public List<HotNews> GetHotNews() {
+    return lSMapper.GetHotNews();
+  }
 }

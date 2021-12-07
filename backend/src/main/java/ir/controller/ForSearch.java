@@ -2,7 +2,10 @@ package ir.controller;
 
 import ir.common.Message;
 import ir.lucene.LuceneSearch;
+import ir.lucene.SearchPredict;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequestMapping(value = "/api")
@@ -19,6 +23,9 @@ public class ForSearch extends BaseController {
 
   @Autowired
   private LuceneSearch luceneSearch;
+
+  @Autowired
+  private SearchPredict searchPredict;
 
   @PostMapping(value = "/search")
   public Message IRetrieve(@RequestBody Map<String, String> irEntity)
@@ -31,8 +38,13 @@ public class ForSearch extends BaseController {
   }
 
   @GetMapping(value = "/hot-search")
-  public String hotSearch() {
-    return null;
+  public Message HotSearch() {
+    return super.buildRestResult(luceneSearch.GetHotNews());
+  }
+
+  @GetMapping(value = "/complete-predict")
+  public Message SearchPredict(@RequestParam String q) throws IOException {
+    return super.buildRestResult(searchPredict.SearchPredict(q));
   }
 
   @GetMapping(value = "/create-index")

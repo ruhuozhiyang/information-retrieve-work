@@ -2,8 +2,7 @@
   <div :class="tagsChoose">
     <a-auto-complete
       v-model="searchValue"
-      style="width: 100%"
-      placeholder="请输入"
+      style="width: 100%;"
       size="large"
       option-label-prop="value"
       :open="drop_open"
@@ -11,10 +10,9 @@
       @focus="get_history"
       @blur="drop_open = false"
       @select="drop_open = false"
-      @change="drop_open = true"
     >
       <template slot="dataSource" v-if="!a_c">
-        <a-select-opt-group v-for="c_group in auto_complete_data" :key="c_group.title">
+        <a-select-opt-group v-for="c_group in auto_complete_data" :key="c_group.title" :value="c_group.title">
           <span slot="label">
             {{ c_group.title }}
           </span>
@@ -27,9 +25,9 @@
         </a-select-opt-group>
       </template>
       <template slot="dataSource" v-else>
-        <a-select-option v-for="e in auto_complete_data" :key="e" :value="e">{{ e }}</a-select-option>
+        <a-select-option v-for="e in auto_complete_data" :key="e + ''">{{ e }}</a-select-option>
       </template>
-      <a-input @pressEnter="onSearch" @click.stop>
+      <a-input @pressEnter="onSearch">
         <a-button
           slot="suffix"
           style="margin-right: -12px"
@@ -47,7 +45,8 @@
 <script>
 import { Input, AutoComplete, Select } from 'ant-design-vue';
 import Vue from 'vue';
-import { g_history, m_history } from '../../utils/utils';
+import { g_history, m_history, f_d } from '../../utils/utils';
+import axios from 'axios';
 
 const { Search } = Input;
 const { OptGroup, Option } = Select;
@@ -57,6 +56,8 @@ Vue.component(AutoComplete.name, AutoComplete)
 Vue.component(Select.name, Select)
 Vue.component(Option.name, Option)
 Vue.component(OptGroup.name, OptGroup)
+
+const c_p_api = '/api/complete-predict';
 
 export default {
   props: {
@@ -70,6 +71,7 @@ export default {
       auto_complete_data: [],
       drop_open: false,
       a_c: false, // 是否是自动补齐
+      pre_predict: {},
     }
   },
   methods: {
@@ -92,8 +94,23 @@ export default {
       this.auto_complete_data = this.g_s_h();
     },
     get_complete(v) {
+      if (!v) {
+        this.drop_open = false;
+        return
+      }
+      this.drop_open = true;
       this.a_c = true;
-      this.auto_complete_data = !v ? [] : [v, v.repeat(2), v.repeat(3)];
+      let p = this.pre_predict[v];
+      if (p) {
+        this.auto_complete_data = p;
+      } else {
+        axios.get(c_p_api, { params: { q: v }}).then((r) => {
+          this.auto_complete_data = r.data.data ? f_d(r.data.data) : [];
+          this.pre_predict[v] = this.auto_complete_data;
+        }).catch((err) => {
+          alert(err)
+        });
+      }
     },
     onSearch() {
       this.auto_complete_data = [];

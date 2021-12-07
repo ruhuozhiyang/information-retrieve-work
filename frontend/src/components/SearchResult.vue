@@ -19,14 +19,17 @@
 				<a-spin :spinning="loading" size="large">
 					<a-list item-layout="vertical" :data-source="newsList" :split="false" :pagination="pagination">
 						<a-list-item slot="renderItem" slot-scope="item">
-							<a-card :hoverable="true" class="card">
+							<!-- <a-card :hoverable="true" class="card"> -->
 								<a style="color: lightgrey">{{ urlByLevel(item.url) }}</a>
 								<div class="result_card">
 									<a :href="item.url" class="a_style" v-html="item.title + ' -' + item.source_website"></a>
 								</div>
 								<div class="result_card" v-html="getSummary(item.time, item.summary)"></div>
-								<!-- <div class="result_card">发布时间:{{}}</div> -->
-							</a-card>
+								<div class="result_card1">
+									热度:{{ item.heat }}
+									<a style="float: right; color: lightgrey;">相似新闻></a>
+								</div>
+							<!-- </a-card> -->
 						</a-list-item>
 					</a-list>
 				</a-spin>
@@ -134,7 +137,7 @@ export default {
 					// global.console.log(this.newsList)
 				}).catch((err) => {
 					this.loading = false;
-					global.console.log(err);
+					alert(err);
 				});
 			},
     },
@@ -188,5 +191,8 @@ export default {
 }
 .result_card {
 	margin-top: 5px;
+}
+.result_card1 {
+	margin-top: 10px;
 }
 </style>

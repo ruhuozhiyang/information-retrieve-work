@@ -1,15 +1,15 @@
 <template>
   <div>
-      <div id="app">
-        <img
-          :style="{ height: '80px' }"
-          alt="News logo"
-          src="../assets/logo.png"
-        >
-      </div>
-      <SearchBanner />
-      <HotSearch />
-      <router-view />
+    <div id="app">
+      <img
+        :style="{ height: '80px' }"
+        alt="News logo"
+        src="../assets/logo.png"
+      >
+    </div>
+    <SearchBanner />
+    <HotSearch />
+    <router-view />
   </div>
 </template>
 

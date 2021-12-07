@@ -83,8 +83,13 @@ const remove_history = (k, v) => {
 	}
 }
 
+const filter_duplicate = (arr) => {
+	return [... new Set(arr)]
+}
+
 export const urlByLevel = showUrlByLevel;
 export const getTime = getCTime;
 export const r_history = record_history;
 export const g_history = get_history;
 export const m_history = remove_history;
+export const f_d = filter_duplicate;
