@@ -51,7 +51,7 @@ import { List, Spin, Card, Button, Select } from 'ant-design-vue'
 import SearchBanner from './common/SearchBanner.vue';
 import Footer from './common/Footer.vue';
 import axios from 'axios';
-import { urlByLevel, getTime, r_history } from '../utils/utils';
+import { urlByLevel, getTime, r_history, g_t } from '../utils/utils';
 
 const searchApi = '/api/search';
 const { Item } = List;
@@ -124,9 +124,10 @@ export default {
 				}
 				this.loading = true;
 				const params = {
-					content: value,
-					page: currentPage,
-					sort: s
+					c: value,
+					p: currentPage,
+					s: s,
+					t: g_t(),
 				};
 				axios.post(searchApi, params).then((res) => {
 					this.loading = false;

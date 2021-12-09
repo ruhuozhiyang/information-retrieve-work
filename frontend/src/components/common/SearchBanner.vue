@@ -9,7 +9,7 @@
       @search="get_complete"
       @focus="get_history"
       @blur="drop_open = false"
-      @select="drop_open = false"
+      @select="c_s"
     >
       <template slot="dataSource" v-if="!a_c">
         <a-select-opt-group v-for="c_group in auto_complete_data" :key="c_group.title" :value="c_group.title">
@@ -25,7 +25,9 @@
         </a-select-opt-group>
       </template>
       <template slot="dataSource" v-else>
-        <a-select-option v-for="e in auto_complete_data" :key="e + ''">{{ e }}</a-select-option>
+        <a-select-option v-for="e in auto_complete_data" :key="e + ''">
+          <span v-html="e"></span>
+        </a-select-option>
       </template>
       <a-input @pressEnter="onSearch">
         <a-button
@@ -45,7 +47,7 @@
 <script>
 import { Input, AutoComplete, Select } from 'ant-design-vue';
 import Vue from 'vue';
-import { g_history, m_history, f_d } from '../../utils/utils';
+import { g_history, m_history, f_d, h_l_a_o } from '../../utils/utils';
 import axios from 'axios';
 
 const { Search } = Input;
@@ -75,6 +77,12 @@ export default {
     }
   },
   methods: {
+    c_s(v) {
+      this.drop_open = false;
+      if (v.indexOf("<font color='red'>") > -1) {
+        this.searchValue = v.replace("<font color='red'>", '').replace("</font>", '');
+      }
+    },
     g_s_h() {
       this.a_c = false;
       if (!g_history('n_r')) {
@@ -93,6 +101,9 @@ export default {
       this.drop_open = true;
       this.auto_complete_data = this.g_s_h();
     },
+    get_high_light(c, a) {
+      return h_l_a_o(c, a, "<font color='red'>", "</font>");
+    },
     get_complete(v) {
       if (!v) {
         this.drop_open = false;
@@ -100,12 +111,16 @@ export default {
       }
       this.drop_open = true;
       this.a_c = true;
+      if (h_l_a_o(v, g_history('n_r')).length > 0) {
+        this.auto_complete_data = this.get_high_light(v, g_history('n_r'));
+        return
+      }
       let p = this.pre_predict[v];
       if (p) {
-        this.auto_complete_data = p;
+        this.auto_complete_data = this.get_high_light(v, p);
       } else {
         axios.get(c_p_api, { params: { q: v }}).then((r) => {
-          this.auto_complete_data = r.data.data ? f_d(r.data.data) : [];
+          this.auto_complete_data = r.data.data ? this.get_high_light(v, f_d(r.data.data)) : [];
           this.pre_predict[v] = this.auto_complete_data;
         }).catch((err) => {
           alert(err)

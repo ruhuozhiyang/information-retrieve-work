@@ -30,10 +30,11 @@ public class ForSearch extends BaseController {
   @PostMapping(value = "/search")
   public Message IRetrieve(@RequestBody Map<String, String> irEntity)
       throws IOException, InvalidTokenOffsetsException, ParseException {
-    String search_content = irEntity.get("content");
-    int page = new Integer(irEntity.get("page"));
-    String sort_s = irEntity.get("sort");
-    System.out.println("收到：" + sort_s);
+    String search_content = irEntity.get("c");
+    int page = new Integer(irEntity.get("p"));
+    String sort_s = irEntity.get("s");
+    String t = irEntity.get("t");
+    luceneSearch.RecordSearch(search_content, t);
     return super.buildRestResult(luceneSearch.searchIndex("title", search_content, page, sort_s));
   }
 

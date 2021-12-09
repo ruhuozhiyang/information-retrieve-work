@@ -214,4 +214,17 @@ public class LuceneSearch {
   public List<HotNews> GetHotNews() {
     return lSMapper.GetHotNews();
   }
+
+  /**
+   * 记录搜索内容.
+   * @param c 搜索内容.
+   * @param t 时间.
+   */
+  public void RecordSearch(String c, String t) {
+    if (lSMapper.If_E(c) > 0) {
+      lSMapper.IncSearchCount(c, t);
+    } else {
+      lSMapper.RecordSearch(c, t);
+    }
+  }
 }

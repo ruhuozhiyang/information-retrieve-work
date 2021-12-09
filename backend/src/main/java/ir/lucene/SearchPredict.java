@@ -1,12 +1,15 @@
 package ir.lucene;
 
+import ir.mapper.LuceneSearchMapper;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Resource;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.synonym.SynonymGraphFilterFactory;
@@ -32,30 +35,47 @@ public class SearchPredict {
 
   @Value("${index.store.path}")
   private String indexStorePath;
-
   @Value("${complete_weight_h}")
   private float c_w_h;
+  @Value("${complete_count}")
+  private int complete_count;
+  @Resource
+  private LuceneSearchMapper lMapper;
 
   private final String p_f = "title";
+
+  private List<String> GetIndexPredict(Query query, String q, List<String> p) throws IOException {
+    Directory directory = FSDirectory.open(new File(indexStorePath).toPath());
+    IndexReader indexReader = DirectoryReader.open(directory);
+    IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+    TopDocs topDocs = indexSearcher.search(query, complete_count - p.size());
+    for(ScoreDoc scoreDoc : topDocs.scoreDocs) {
+      String t_c = indexSearcher.doc(scoreDoc.doc).get(p_f);
+      int b_i = t_c.toLowerCase().indexOf(q.toLowerCase());
+      if (b_i > -1) p.add(t_c.substring(b_i, b_i + 5 >= t_c.length() ? t_c.length() -1 : b_i + 5));
+    }
+    indexReader.close();
+    return p;
+  }
 
   public List<String> SearchPredict(String q) throws IOException {
     // 优先看一看搜索历史
     // 要兼顾搜索较多的词条
     // 同义词
     // 固有的行业词条 不同的权重
-    Directory directory = FSDirectory.open(new File(indexStorePath).toPath());
-    IndexReader indexReader = DirectoryReader.open(directory);
-    IndexSearcher indexSearcher = new IndexSearcher(indexReader);
-    Query query = new PrefixQuery(new Term(p_f, q));
-    TopDocs topDocs = indexSearcher.search(query, 10);
-
     List<String> pre_l = new ArrayList<>();
-    for(ScoreDoc scoreDoc : topDocs.scoreDocs) {
-      String t_c = indexSearcher.doc(scoreDoc.doc).get(p_f);
-      int b_i = t_c.toLowerCase().indexOf(q.toLowerCase());
-      if (b_i > -1) pre_l.add(t_c.substring(b_i, b_i + 5 >= t_c.length() ? t_c.length() -1 : b_i + 5));
+    List<Map<String, Object>> l_m = lMapper.GetCompleteFromSql(q);
+    if (l_m.size() > 0) {
+      Iterator<Map<String, Object>> it = l_m.iterator();
+      while (it.hasNext()) {
+        pre_l.add((String) it.next().get("content"));
+      }
     }
-    indexReader.close();
+    if (pre_l.size() < complete_count) {
+      Query query = new PrefixQuery(new Term(p_f, q));
+      List<String> g_i_p = GetIndexPredict(query, q, pre_l);
+      return g_i_p;
+    }
     return pre_l;
   }
 

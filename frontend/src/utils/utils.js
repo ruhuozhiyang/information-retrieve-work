@@ -87,9 +87,40 @@ const filter_duplicate = (arr) => {
 	return [... new Set(arr)]
 }
 
+const get_time = () => {
+	let y = new Date().getFullYear();
+	let m = new Date().getMonth() + 1;
+	let d = new Date().getDate();
+	return y + '-' + m + '-' + d;
+}
+
+/**
+ * 自定义高亮显示.
+ * @param {*} c 高亮字段.
+ * @param {*} arr 候选内容数组.
+ * @param {*} l_t 左标签.
+ * @param {*} r_t 右标签.
+ * @returns [].
+ */
+const high_light_arr_obj = (c, arr, l_t, r_t) => {
+	let r = [];
+	if (Array.isArray(arr)) {
+		arr.forEach(e => {
+			if (e.indexOf(c) > -1) {
+				let l_i = e.indexOf(c);
+				let r_i = e.indexOf(c) + c.length;
+				r.push(e.substring(0, l_i) + l_t + e.substring(l_i, r_i) + r_t + e.substring(r_i, e.length));
+			}
+		});
+	}
+	return r
+}
+
 export const urlByLevel = showUrlByLevel;
 export const getTime = getCTime;
 export const r_history = record_history;
 export const g_history = get_history;
 export const m_history = remove_history;
 export const f_d = filter_duplicate;
+export const g_t = get_time;
+export const h_l_a_o = high_light_arr_obj;
