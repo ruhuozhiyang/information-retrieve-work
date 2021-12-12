@@ -27,7 +27,9 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Sort;
@@ -36,6 +38,9 @@ import org.apache.lucene.search.SortField.Type;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
 import org.apache.lucene.search.similarities.BM25Similarity;
+import org.apache.lucene.search.suggest.DocumentDictionary;
+import org.apache.lucene.search.suggest.Lookup;
+import org.apache.lucene.search.suggest.analyzing.AnalyzingInfixSuggester;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.store.Directory;
@@ -59,6 +64,11 @@ public class LuceneSearch {
 
   @Value("${hot_news_count}")
   private int HotNewsCount;
+  
+  //new members for auto complete
+  private String phraseFiles;//分词词典存放路径，末尾需要‘\\’
+  private String prefixIndexStorePath;//suggester存放索引的路径
+  private String phrIndexStorePath;//对分词词典建立的索引的存储路径
 
   @Resource
   private LuceneSearchMapper lSMapper;
@@ -227,4 +237,85 @@ public class LuceneSearch {
       lSMapper.RecordSearch(c, t);
     }
   }
+  
+  
+  //functions for auto complete:
+  
+  //对分词词典建立索引
+  public Boolean createPhraseIndex() throws Exception {
+		DeleteDir.DeleteDir(phrIndexStorePath);
+	    Analyzer analyzer = new IKAnalyzer();
+	    Directory directory = FSDirectory.open(new File(phrIndexStorePath).toPath());
+	    IndexWriter indexWriter = new IndexWriter(directory, new IndexWriterConfig(analyzer));
+	    File dir = new File(phraseFiles);
+	    File[] files = dir.listFiles();
+	    if (files != null) {
+	      for (File file:
+	      files) {
+	        String filepath = file.getPath();
+	        List<String> phrItems = GetNewsFromTxt.GetPhraseObject(filepath);
+	        for(int i=0;i<phrItems.size();i++) {
+	        	Field phr_content = new TextField("content", phrItems.get(i), Store.YES);
+	        	Document document = new Document();
+	        	document.add(phr_content);
+	        	indexWriter.addDocument(document);
+	        }
+	      }
+	    }
+	    indexWriter.close();
+		return true;
+  }
+  
+  //suggester建立索引
+  public Boolean createSuggestIndex() throws Exception {
+	  //Analyzer analyzer = new StandardAnalyzer();
+	  Analyzer analyzer = new IKAnalyzer();
+	  DeleteDir.DeleteDir(prefixIndexStorePath);
+	  Directory preDirectory=FSDirectory.open(new File(prefixIndexStorePath).toPath());
+	  Directory directory = FSDirectory.open(new File(phrIndexStorePath).toPath());
+	  AnalyzingInfixSuggester suggester = new AnalyzingInfixSuggester(preDirectory, analyzer); 
+	  IndexReader indexReader = DirectoryReader.open(directory);
+	  DocumentDictionary DocDiction=new DocumentDictionary(indexReader,"content","content");
+	  suggester.build(DocDiction.getEntryIterator());
+	  return true;
+  }
+  
+  //通过suggester获取自动补全
+  public List<String> autoComplete(String content, int maxNum) throws IOException
+  {
+	  List<String> strList=new ArrayList();
+	  //Analyzer analyzer = new StandardAnalyzer();
+	  Analyzer analyzer = new IKAnalyzer();
+	  Directory preDirectory=FSDirectory.open(new File(prefixIndexStorePath).toPath());
+	  AnalyzingInfixSuggester suggester = new AnalyzingInfixSuggester(preDirectory, analyzer); 
+	  List<Lookup.LookupResult> lkResults = suggester.lookup(content,maxNum,true,true);
+	  for(int i=0;i<lkResults.size();i++)
+	  {
+		  strList.add(lkResults.get(i).toString());
+	  }
+	  return strList;
+  }
+  
+  //通过前缀查询获得自动补全
+  public List<String> prefixQ(String content, int maxNum) throws IOException
+  {
+	  List<String> result=new ArrayList();
+	  Query query=null;
+	  Term term = new Term("content", content);
+	    Directory directory = FSDirectory.open(new File(phrIndexStorePath).toPath());
+	    IndexReader indexReader = DirectoryReader.open(directory);
+	    IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+	    query=new PrefixQuery(term);
+	    TopDocs topDocs=indexSearcher.search(query, maxNum);
+	    ScoreDoc[] scoreDocs = topDocs.scoreDocs;
+	    long returnNum=(topDocs.totalHits<maxNum)?topDocs.totalHits:maxNum;
+	    for (int i=0;i<returnNum; i++) {
+	        int docId = scoreDocs[i].doc;
+	        //根据文档id获取文档
+	        Document document = indexSearcher.doc(docId);
+	        result.add(document.get("content"));
+	        }
+		return result;
+  }
+  
 }
