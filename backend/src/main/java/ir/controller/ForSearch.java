@@ -4,8 +4,6 @@ import ir.common.Message;
 import ir.lucene.LuceneSearch;
 import ir.lucene.SearchPredict;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
@@ -52,6 +50,20 @@ public class ForSearch extends BaseController {
   public Message CreateIndex() {
     try {
       Boolean ifSuccess = luceneSearch.createIndex();
+      return super.buildRestResult(ifSuccess, ifSuccess ? 1 : 0, ifSuccess ? "创建成功" : "创建失败", null);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return super.buildRestResult(false, 0, "创建失败", null);
+    }
+  }
+
+  @GetMapping(value = "/create-phrase-sug")
+  public Message CreatePhraseSug() {
+    try {
+      Boolean ifSuccess = false;
+      if (searchPredict.createPhraseIndex()) {
+        ifSuccess = searchPredict.createSuggestIndex();
+      }
       return super.buildRestResult(ifSuccess, ifSuccess ? 1 : 0, ifSuccess ? "创建成功" : "创建失败", null);
     } catch (Exception e) {
       e.printStackTrace();

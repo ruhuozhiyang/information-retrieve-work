@@ -44,6 +44,7 @@ public class GetNewsFromTxt {
     }
     return newsItems;
   }
+
   public static List<String> GetPhraseObject(String filePath) throws IOException {
 	    List<String> phrItems = new ArrayList<>();
 	    File fileName = new File(filePath);
