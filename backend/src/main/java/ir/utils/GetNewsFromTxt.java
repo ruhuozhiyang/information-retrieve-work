@@ -44,5 +44,17 @@ public class GetNewsFromTxt {
     }
     return newsItems;
   }
+  public static List<String> GetPhraseObject(String filePath) throws IOException {
+	    List<String> phrItems = new ArrayList<>();
+	    File fileName = new File(filePath);
+	    InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(fileName),"UTF-8");
+	    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+	    String line = bufferedReader.readLine();
+	    while (line != null) {
+	      phrItems.add(line.split(" ")[0]);
+	      line = bufferedReader.readLine();
+	    }
+	    return phrItems;
+	  }
 
 }
