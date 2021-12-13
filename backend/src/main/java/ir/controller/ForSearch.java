@@ -35,6 +35,13 @@ public class ForSearch extends BaseController {
     luceneSearch.RecordSearch(search_content, t);
     return super.buildRestResult(luceneSearch.searchIndex("title", search_content, page, sort_s));
   }
+  
+  @GetMapping("similaritySearch")
+  public Message similaritySearch(String c) {
+      List<String> similaritySearch = luceneSearch.similaritySearch(c);
+      return super.buildRestResult(similaritySearch);
+  }
+
 
   @GetMapping(value = "/hot-search")
   public Message HotSearch() {
