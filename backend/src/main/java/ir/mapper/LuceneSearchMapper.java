@@ -36,4 +36,7 @@ public interface LuceneSearchMapper {
 
   @Select(value = "select * from all_search_record where content like concat('%', #{c}, '%') limit 10")
   List<Map<String, Object>> GetCompleteFromSql(String c);
+
+  @Select(value = "select content from all_search_record where content like concat('%',#{c},'%') limit 10")
+  List<String> similaritySearch(String c);
 }
