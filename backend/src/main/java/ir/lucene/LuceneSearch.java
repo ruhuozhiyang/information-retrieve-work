@@ -227,5 +227,13 @@ public class LuceneSearch {
       lSMapper.RecordSearch(c, t);
     }
   }
+	
+  public List<String> similaritySearch(String searchKey) {
+	List<String> list = lSMapper.similaritySearch(searchKey);
+	if (list.size() == 0) {
+	    list = lSMapper.similaritySearch("");
+	}
+	return list;
+  }
   
 }
