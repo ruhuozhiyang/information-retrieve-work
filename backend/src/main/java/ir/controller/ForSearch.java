@@ -36,6 +36,7 @@ public class ForSearch extends BaseController {
     return super.buildRestResult(luceneSearch.searchIndex("title", search_content, page, sort_s));
   }
 
+
   @GetMapping(value = "/hot-search")
   public Message HotSearch() {
     return super.buildRestResult(luceneSearch.GetHotNews());

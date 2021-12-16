@@ -75,93 +75,93 @@ Vue.component(Icon.name, Icon)
 
 
 export default {
-    name: 'SearchResult',
-    data() {
-			return {
-				content: '',
-				newsList: [],
-				loading: false,
-				news_count: 20000,
-				search_time: 0.35,
-				pagination: {
-					onChange: (page) => {
-						this.pagination.current = page;
-						this.getNews(this.content, page, this.sort)
-					},
-					pageSize: 10,
-					current: 1,
-					total: 0,
+	name: 'SearchResult',
+	data() {
+		return {
+			content: '',
+			newsList: [],
+			loading: false,
+			news_count: 20000,
+			search_time: 0.35,
+			pagination: {
+				onChange: (page) => {
+					this.pagination.current = page;
+					this.getNews(this.content, page, this.sort)
 				},
-				tool: true,
-				sort: 'r',
-				rel_search: [],
+				pageSize: 10,
+				current: 1,
+				total: 0,
+			},
+			tool: true,
+			sort: 'r',
+			rel_search: [],
+		}
+	},
+	methods: {
+		handleChange(s) {
+			this.sort = s;
+			this.getNews(this.content, 1, s)
+		},
+		setTools() {
+			this.sort = 'r';
+			this.tool = !this.tool;
+		},
+		getSummary(t, s) {
+			let s1 = '';
+			let t1 = '<span style="color: grey;">' + this.getTime(t) + '——' + '</span>';
+			s1 = t1 + (s || '') + '...'
+			return s1
+		},
+		getTime(t) {
+			if (t.indexOf('-') > 0) {
+				return getTime(t, '-')
 			}
-    },
-    methods: {
-			handleChange(s) {
-				this.sort = s;
-				this.getNews(this.content, 1, s)
-			},
-			setTools() {
-				this.sort = 'r';
-				this.tool = !this.tool;
-			},
-			getSummary(t, s) {
-				let s1 = '';
-				let t1 = '<span style="color: grey;">' + this.getTime(t) + '——' + '</span>';
-				s1 = t1 + (s || '') + '...'
-				return s1
-			},
-			getTime(t) {
-				if (t.indexOf('-') > 0) {
-					return getTime(t, '-')
-				}
-			},
-			urlByLevel(url) {
-				return urlByLevel(url)
-			},
-			onSearch(value, currentPage) {
-				this.content = value;
-				this.pagination.current = 1;
-				this.getNews(value, currentPage, this.sort);
-			},
-			getNews(value, currentPage, s) {
-				r_history('n_r', value);
-				if (!s) {
-					s = 'r'
-				}
-				this.loading = true;
-				const params = {
-					c: value,
-					p: currentPage,
-					s: s,
-					t: g_t(),
-				};
-				axios.post(searchApi, params).then((res) => {
-					this.loading = false;
-					this.newsList = res.data.data.irEntities || [];
-					this.news_count = res.data.data.count || 0;
-					this.pagination.total = this.news_count;
-					this.search_time = res.data.data.time ? res.data.data.time / 1000 : 0;
-					this.rel_search = res.data.data.relSearch ? new Set(res.data.data.relSearch) : [];
-					// global.console.log(this.newsList)
-				}).catch((err) => {
-					this.loading = false;
-					alert(err);
-				});
-			},
-    },
-    components: {
-      SearchBanner,
-			Footer,
-    },
-    mounted() {
-			if (this.$route.query) {
-					const { content } = this.$route.query;
-					this.content = content;
-					this.getNews(content, 1)
+		},
+		urlByLevel(url) {
+			return urlByLevel(url)
+		},
+		onSearch(value, currentPage) {
+			global.console.log(value);
+			this.content = value;
+			this.pagination.current = 1;
+			this.getNews(value, currentPage, this.sort);
+		},
+		getNews(value, currentPage, s) {
+			r_history('n_r', value);
+			if (!s) {
+				s = 'r'
 			}
-    },
+			this.loading = true;
+			const params = {
+				c: value,
+				p: currentPage,
+				s: s,
+				t: g_t(),
+			};
+			axios.post(searchApi, params).then((res) => {
+				this.loading = false;
+				this.newsList = res.data.data.irEntities || [];
+				this.news_count = res.data.data.count || 0;
+				this.pagination.total = this.news_count;
+				this.search_time = res.data.data.time ? res.data.data.time / 1000 : 0;
+				this.rel_search = res.data.data.relSearch ? new Set(res.data.data.relSearch) : [];
+			}).catch((err) => {
+				this.loading = false;
+				alert(err);
+			});
+		},
+	},
+	components: {
+		SearchBanner,
+		Footer,
+	},
+	mounted() {
+		if (this.$route.query) {
+				const { content } = this.$route.query;
+				this.content = content;
+				this.getNews(content, 1)
+		}
+	},
 }
 </script>
 
