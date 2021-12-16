@@ -41,6 +41,7 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.wltea.analyzer.lucene.IKAnalyzer;
@@ -62,6 +63,9 @@ public class LuceneSearch {
 
   @Resource
   private LuceneSearchMapper lSMapper;
+
+  @Autowired
+  private SearchPredict sP;
 
   private List<HotNews> hot_news = new ArrayList<>(HotNewsCount);
   private List<Integer> heat_t_l = new ArrayList<>(HotNewsCount);
@@ -204,12 +208,13 @@ public class LuceneSearch {
     indexReader.close();
     long t2 = new Date().getTime();
     String cost_time = String.valueOf(t2 - t1);
-    return SearchReturn.builder().count(topDocs.totalHits).irEntities(ResultList).time(cost_time).build();
+    return SearchReturn.builder().count(topDocs.totalHits).irEntities(ResultList).time(cost_time)
+        .relSearch(sP.relevantSuggest(content, 10)).build();
   }
 
   /**
    * 获取前HotNewsCount名热度新闻.
-   * @return searchReturn.
+   * @return list.
    */
   public List<HotNews> GetHotNews() {
     return lSMapper.GetHotNews();

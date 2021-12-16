@@ -20,6 +20,8 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
@@ -179,5 +181,26 @@ public class SearchPredict {
       result.add(document.get("content"));
     }
     return result;
+  }
+
+  public List<String> relevantSuggest(String content, int maxNum)
+      throws IOException, ParseException {
+    List<String> result=new ArrayList();
+    Analyzer analyzer = new IKAnalyzer();
+    Directory directory = FSDirectory.open(new File(phrIndexStorePath).toPath());
+    IndexReader indexReader = DirectoryReader.open(directory);
+    IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+    QueryParser queryParser =new QueryParser("content",analyzer);
+    Query query=queryParser.parse(content);
+    TopDocs topDocs=indexSearcher.search(query, maxNum);
+    ScoreDoc[] scoreDocs = topDocs.scoreDocs;
+    long returnNum=(topDocs.totalHits<maxNum)?topDocs.totalHits:maxNum;
+    for (int i=0;i<returnNum; i++) {
+      int docId = scoreDocs[i].doc;
+      Document document = indexSearcher.doc(docId);
+      result.add(document.get("content"));
+    }
+    return result;
+
   }
 }

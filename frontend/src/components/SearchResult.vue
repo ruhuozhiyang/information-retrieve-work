@@ -36,8 +36,12 @@
 			</div>
 			<div class="right_module">
 				<a-card class="right_card" title="相关搜索">
-					搜索1
-					搜索2
+					<a-row :gutter="[10, 20]">
+						<a-col span="10" v-for="(item, index) in rel_search" :key="item" :class="index % 2 ? 'rel_s1' : 'rel_s'">
+							<a-icon type="search" style="marginLeft: 5%" />
+							<a style="marginLeft: 5%; color: black;" @click="onSearch(item, 1)">{{ item }}</a>
+						</a-col>
+					</a-row>
 				</a-card>
 			</div>
 		</div>
@@ -47,7 +51,7 @@
 
 <script>
 import Vue from 'vue';
-import { List, Spin, Card, Button, Select } from 'ant-design-vue'
+import { List, Spin, Card, Button, Select, Row, Col, Icon } from 'ant-design-vue'
 import SearchBanner from './common/SearchBanner.vue';
 import Footer from './common/Footer.vue';
 import axios from 'axios';
@@ -65,6 +69,9 @@ Vue.component(Card.name, Card);
 Vue.component(Button.name, Button)
 Vue.component(Select.name, Select)
 Vue.component(Option.name, Option);
+Vue.component(Row.name, Row)
+Vue.component(Col.name, Col)
+Vue.component(Icon.name, Icon)
 
 
 export default {
@@ -87,6 +94,7 @@ export default {
 				},
 				tool: true,
 				sort: 'r',
+				rel_search: [],
 			}
     },
     methods: {
@@ -135,6 +143,7 @@ export default {
 					this.news_count = res.data.data.count || 0;
 					this.pagination.total = this.news_count;
 					this.search_time = res.data.data.time ? res.data.data.time / 1000 : 0;
+					this.rel_search = res.data.data.relSearch ? new Set(res.data.data.relSearch) : [];
 					// global.console.log(this.newsList)
 				}).catch((err) => {
 					this.loading = false;
@@ -168,7 +177,7 @@ export default {
 	float: left;
 }
 .right_module {
-	width: 30%;
+	width: 33%;
 	float: left;
 }
 .right_card {
@@ -195,5 +204,19 @@ export default {
 }
 .result_card1 {
 	margin-top: 10px;
+}
+.rel_s {
+	background-color: rgb(237, 240, 241);
+	border-radius: 20px;
+	font-weight: bold;
+	margin-top: 5%;
+	margin-left: 4%;
+}
+.rel_s1 {
+	background-color: rgb(237, 240, 241);
+	border-radius: 20px;
+	font-weight: bold;
+	margin-top: 5%;
+	margin-left: 7%;
 }
 </style>
