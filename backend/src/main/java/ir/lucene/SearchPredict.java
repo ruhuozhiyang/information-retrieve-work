@@ -75,7 +75,6 @@ public class SearchPredict {
     // 优先看一看搜索历史
     // 要兼顾搜索较多的词条
     // 同义词
-    // 固有的行业词条 不同的权重
     List<String> pre_l = new ArrayList<>();
     List<Map<String, Object>> l_m = lMapper.GetCompleteFromSql(q);
     if (l_m.size() > 0) {
@@ -151,7 +150,7 @@ public class SearchPredict {
     List<Lookup.LookupResult> lkResults = suggester.lookup(content, maxNum, true,true);
     for(int i=0; i < lkResults.size(); i++)
     {
-      p.add(lkResults.get(i).toString());
+      p.add(lkResults.get(i).toString().substring(0, lkResults.get(i).toString().length() - 2));
     }
     return p;
   }
@@ -195,7 +194,7 @@ public class SearchPredict {
     TopDocs topDocs=indexSearcher.search(query, maxNum);
     ScoreDoc[] scoreDocs = topDocs.scoreDocs;
     long returnNum=(topDocs.totalHits<maxNum)?topDocs.totalHits:maxNum;
-    for (int i=0;i<returnNum; i++) {
+    for (int i=0; i < returnNum; i++) {
       int docId = scoreDocs[i].doc;
       Document document = indexSearcher.doc(docId);
       result.add(document.get("content"));

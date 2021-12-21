@@ -68,6 +68,11 @@ export default {
         axios.get(hostSearchApi).then((res) => {
           if (res.data.success) {
             const r = res.data.data || [];
+            r.forEach(e => {
+             let t = e.title
+             let b = t.substring(35) === '' ? '' : '...'
+             e.title = t.substring(0, 35) + b
+            });
             this.hot_news = r;
           }
           this.list_load = false;

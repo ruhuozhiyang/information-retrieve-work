@@ -1,7 +1,7 @@
 # information_retrieve_work
 build a simple tool for searching news daily meeting some demands.
 
-### 前端采用vue+ant-design-vue2.2.8+echarts+axios
+### 前端采用vue+ant-design-vue2.2.8+axios
 
 ### 后端采用SpringBoot+Gradle7.2
 

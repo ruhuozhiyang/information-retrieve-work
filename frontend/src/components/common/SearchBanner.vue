@@ -80,7 +80,7 @@ export default {
     c_s(v) {
       this.drop_open = false;
       if (v.indexOf("<font color='red'>") > -1) {
-        this.searchValue = v.replace("<font color='red'>", '').replace("</font>", '');
+        this.searchValue = v.replaceAll("<font color='red'>", '').replaceAll("</font>", '');
       }
     },
     g_s_h() {

@@ -8,10 +8,8 @@
  */
 
 rootProject.name = 'information_retrieve_work'
-include('app', 'frontend')
 
-findProject(":app")?.name = "app"
+findProject(":backend")?.name = "backend"
 findProject(":frontend")?.name = "frontend"
-include 'backend'
-include 'backend'
+include('backend', 'frontend')
 

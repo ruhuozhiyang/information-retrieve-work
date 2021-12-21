@@ -35,6 +35,14 @@ dependencies {
     runtimeOnly("mysql:mysql-connector-java")
 }
 
-test {
-    useJUnitPlatform()
+bootJar {
+    dependsOn(":frontend:npmBuild")
+    archiveBaseName = 'IR_Work'
+    archiveVersion = '1.0.0'
+    from("../frontend/dist") {
+        eachFile {
+            logger.info("Copy file to jar: ${name}")
+        }
+        into("static")
+    }
 }

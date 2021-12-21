@@ -106,7 +106,7 @@ const high_light_arr_obj = (c, arr, l_t, r_t) => {
 	let r = [];
 	if (Array.isArray(arr)) {
 		arr.forEach(e => {
-			if (e.indexOf(c) > -1) {
+			if (e.indexOf(c) === 0) {
 				let l_i = e.indexOf(c);
 				let r_i = e.indexOf(c) + c.length;
 				r.push(e.substring(0, l_i) + l_t + e.substring(l_i, r_i) + r_t + e.substring(r_i, e.length));

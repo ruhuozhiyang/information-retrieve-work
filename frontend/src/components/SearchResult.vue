@@ -27,7 +27,7 @@
 								<div class="result_card" v-html="getSummary(item.time, item.summary)"></div>
 								<div class="result_card1">
 									热度:{{ item.heat }}
-									<a style="float: right; color: lightgrey;">相似新闻></a>
+									<a style="float: right; color: lightgrey;" @click="get_similar_news(item.title)">相似新闻></a>
 								</div>
 							<!-- </a-card> -->
 						</a-list-item>
@@ -72,6 +72,10 @@ Vue.component(Option.name, Option);
 Vue.component(Row.name, Row)
 Vue.component(Col.name, Col)
 Vue.component(Icon.name, Icon)
+const h_style_l = "<font color='red'>"
+const h_style_r = "</font>"
+// eslint-disable-next-line no-useless-escape
+const pattern = /[`~!@#$^\-&*()=|{}':;',\\\[\]\.<>\/?~！@#￥……&*（）——|{}【】'；：""'。，、？\s]/g;
 
 
 export default {
@@ -121,10 +125,13 @@ export default {
 			return urlByLevel(url)
 		},
 		onSearch(value, currentPage) {
-			global.console.log(value);
 			this.content = value;
 			this.pagination.current = 1;
 			this.getNews(value, currentPage, this.sort);
+		},
+		get_similar_news(v) {
+			v = v.replaceAll(h_style_l, '').replaceAll(h_style_r, '').replaceAll(pattern, '')
+			this.getNews(v, 1, this.sort);
 		},
 		getNews(value, currentPage, s) {
 			r_history('n_r', value);

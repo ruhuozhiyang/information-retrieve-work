@@ -1,0 +1,11 @@
+plugins {
+    id("com.moowork.node") version ("1.3.1")
+    id("java")
+}
+
+task npmBuild(type: NpmTask, dependsOn: npmInstall) {
+    group = 'node'
+    args = ['run', 'build']
+}
+
+//jar.dependsOn npmBuild  //该模块打Jar包之前必须先运行npm run build.
