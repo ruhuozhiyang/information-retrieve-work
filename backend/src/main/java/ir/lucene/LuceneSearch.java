@@ -114,7 +114,9 @@ public class LuceneSearch {
         	String title = newsItems.get(i).getTitle();
         	String content = newsItems.get(i).getContent();
         	String url = newsItems.get(i).getUrl();
-        	String time = newsItems.get(i).getTime();
+        	String time = newsItems.get(i).getTime().split(" ")[0].equals("")
+              ? newsItems.get(i).getTime().split(" ")[1]
+              : newsItems.get(i).getTime().split(" ")[0];
         	String source_website = newsItems.get(i).getSource_website();
 
         	Field website_url = new TextField("url", url, Store.YES);

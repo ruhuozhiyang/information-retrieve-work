@@ -27,7 +27,7 @@
 								</div>
 								<div class="result_card" v-html="getSummary(item.time, item.summary)"></div>
 								<div class="result_card1">
-									热度:{{ item.heat.substring(0, 5) }}
+									热度:{{ item.heat.substring(0, item.heat.length - 13) }}
 									<a style="float: right; color: lightgrey;" @click="get_similar_news(item.title)">相似新闻></a>
 								</div>
 							<!-- </a-card> -->
@@ -105,6 +105,7 @@ export default {
 	methods: {
 		handleChange(s) {
 			this.sort = s;
+			this.pagination.current = 1;
 			this.getNews(this.content, 1, s)
 		},
 		setTools() {
