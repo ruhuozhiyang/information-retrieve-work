@@ -70,7 +70,10 @@ export default {
     return {
       searchValue: '',
       tagsChoose: 'main',
-      auto_complete_data: [],
+      auto_complete_data: [{
+        title: '搜索记录',
+        children: []
+      }],
       drop_open: false,
       a_c: false, // 是否是自动补齐
       pre_predict: {},
@@ -85,26 +88,21 @@ export default {
     },
     g_s_h() {
       this.a_c = false;
-      if (!g_history('n_r')) {
-        return [];
-      }
-      let t = [];
-      let m = { title: '搜索记录', children: g_history('n_r')};
-      t.push(m);
-      return t;
+      return !g_history('n_r') ? [] : g_history('n_r');
     },
     r_h_item(i) {
       m_history('n_r', i);
-      this.auto_complete_data = this.g_s_h();
+      this.auto_complete_data[0].children = this.g_s_h();
     },
     get_history() {
       this.drop_open = true;
-      this.auto_complete_data = this.g_s_h();
+      this.auto_complete_data[0].children = this.g_s_h();
     },
     get_high_light(c, a) {
       return h_l_a_o(c, a, "<font color='red'>", "</font>");
     },
     get_complete(v) {
+      this.auto_complete_data = [];
       if (!v) {
         this.drop_open = false;
         return

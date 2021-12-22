@@ -1,6 +1,7 @@
 <template>
   <div>
 		<div class="title">
+			<img alt="qiandu logo" src="../assets/logo.png" id="logo">
 			<SearchBanner :content="content" @requestNews="onSearch" />
 		</div>
 		<div class="result_tip">
@@ -26,7 +27,7 @@
 								</div>
 								<div class="result_card" v-html="getSummary(item.time, item.summary)"></div>
 								<div class="result_card1">
-									热度:{{ item.heat }}
+									热度:{{ item.heat.substring(0, 5) }}
 									<a style="float: right; color: lightgrey;" @click="get_similar_news(item.title)">相似新闻></a>
 								</div>
 							<!-- </a-card> -->
@@ -225,5 +226,13 @@ export default {
 	font-weight: bold;
 	margin-top: 5%;
 	margin-left: 7%;
+}
+#logo {
+	margin-top: 1%;
+	margin-left: 1%;
+	width: auto;
+	height: auto;
+	max-width: 50%;
+	max-height: 50%;
 }
 </style>

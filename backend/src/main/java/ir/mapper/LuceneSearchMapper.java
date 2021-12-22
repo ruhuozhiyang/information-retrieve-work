@@ -22,7 +22,7 @@ public interface LuceneSearchMapper {
   })
   Boolean RecordHotNews(@Param("hotNews") List<HotNews> hotNews);
 
-  @Select(value = "select * from hot_news")
+  @Select(value = "select * from hot_news order by heat desc limit 50")
   List<HotNews> GetHotNews();
 
   @Insert(value = "insert into all_search_record(time, content, count) values (#{t}, #{c}, 1)")

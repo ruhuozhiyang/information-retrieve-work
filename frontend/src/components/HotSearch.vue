@@ -16,7 +16,7 @@
               {{ item.title }}
             </a>
           </a-list-item-meta>
-          <a slot="actions" style="color: lightgrey;">{{ item.heat }}</a>
+          <a slot="actions" style="color: lightgrey;">{{ item.heat.substring(0, 5) }}</a>
         </a-list-item>
       </a-list>
     </div>

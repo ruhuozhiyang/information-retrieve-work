@@ -20,6 +20,8 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.LongPoint;
+import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.TextField;
@@ -68,14 +70,14 @@ public class LuceneSearch {
   private SearchPredict sP;
 
   private List<HotNews> hot_news = new ArrayList<>(HotNewsCount);
-  private List<Integer> heat_t_l = new ArrayList<>(HotNewsCount);
+  private List<Long> heat_t_l = new ArrayList<>(HotNewsCount);
 
-  private void SetHotNewsObj(int t_h, String heat, String title, String url) {
+  private void SetHotNewsObj(long t_h, String heat, String title, String url) {
     if (hot_news.size() < HotNewsCount) {
       hot_news.add(new HotNews(heat, title, url));
       heat_t_l.add(t_h);
     } else {
-      int min_h = Collections.min(heat_t_l);
+      Long min_h = Collections.min(heat_t_l);
       if (t_h > min_h) {
         for (HotNews e: hot_news) {
           if (e.getHeat().equals(String.valueOf(min_h))) {
@@ -120,10 +122,12 @@ public class LuceneSearch {
         	Field website_content = new TextField("content", content, Store.YES);
           Field website_time = new SortedDocValuesField("time", new BytesRef(time));
           Field website_source = new TextField("source", source_website, Store.YES);
-          int t_h = r.nextInt(10000);
-          String heat = String.valueOf(t_h);
-          Field website_heat = new SortedDocValuesField("heat", new BytesRef(heat));
-          SetHotNewsObj(t_h, heat, title, url);
+          long heat = r.nextLong();
+          while (heat < 0) {
+            heat = r.nextLong();
+          }
+          Field website_heat = new NumericDocValuesField("heat", heat);
+          SetHotNewsObj(heat, String.valueOf(heat), title, url);
         	Document document = new Document();
         	document.add(website_url);
         	document.add(website_title);
@@ -176,7 +180,7 @@ public class LuceneSearch {
     if (sort_s.equals("t")) {
       topDocs = indexSearcher.search(query, page * pageSize, new Sort(new SortField("time", Type.STRING, true)));
     } else if (sort_s.equals("h")) {
-      topDocs = indexSearcher.search(query, page * pageSize, new Sort(new SortField("heat", Type.STRING, true)));
+      topDocs = indexSearcher.search(query, page * pageSize, new Sort(new SortField("heat", Type.LONG, true)));
     } else {
       topDocs = indexSearcher.search(query, page * pageSize);
     }
@@ -232,5 +236,4 @@ public class LuceneSearch {
       lSMapper.RecordSearch(c, t);
     }
   }
-  
 }
