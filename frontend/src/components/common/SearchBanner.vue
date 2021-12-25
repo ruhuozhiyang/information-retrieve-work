@@ -64,6 +64,7 @@ const c_p_api = '/api/complete-predict';
 export default {
   props: {
     content: String,
+    is_mob: Boolean,
   },
   name: 'SearchBanner',
   data() {
@@ -102,7 +103,6 @@ export default {
       return h_l_a_o(c, a, "<font color='red'>", "</font>");
     },
     get_complete(v) {
-      this.auto_complete_data = [];
       if (!v) {
         this.drop_open = false;
         return
@@ -131,21 +131,24 @@ export default {
         return
       }
       if (this.tagsChoose === 'main') {
-        this.$router.push({ path: '/result', query: { content: this.searchValue }});
-      } else if (this.tagsChoose === 'subPage') {
+        let is_m = window.screen.width < 500
+        this.$router.push({ path: is_m ? '/result_m' : '/result', query: { content: this.searchValue }});
+      } else if (this.tagsChoose === 'subPage' || this.tagsChoose === 'subPageM') {
         this.$emit('requestNews', this.searchValue, 1);
       }
     },
   },
   mounted() {
     this.tagsChoose = this.$route.path === '/' ? 'main' : 'subPage';
+    if (this.is_mob) {
+      this.tagsChoose = 'subPageM'
+    }
   },
   watch: {
     content(value) {
       this.searchValue = value;
     },
   },
-  components: {}
 }
 </script>
 
@@ -174,5 +177,12 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
+}
+.subPageM {
+  text-align: center;
+  width: 100%;
+  height: 200px;
+  margin: auto;
+  margin-top: 20px;
 }
 </style>

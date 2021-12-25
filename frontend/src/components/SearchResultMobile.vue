@@ -1,8 +1,7 @@
 <template>
   <div>
 		<div class="title">
-			<img alt="qiandu logo" src="../assets/logo.png" id="logo">
-			<SearchBanner :content="content" @requestNews="onSearch" />
+			<SearchBanner :is_mob="is_mob" :content="content" @requestNews="onSearch" />
 		</div>
 		<div class="result_tip">
 			<span v-if="tool">找到约{{ news_count }}条结果（用时约{{ search_time }}秒）</span>
@@ -20,7 +19,6 @@
 				<a-spin :spinning="loading" size="large">
 					<a-list item-layout="vertical" :data-source="newsList" :split="false" :pagination="pagination">
 						<a-list-item slot="renderItem" slot-scope="item">
-							<!-- <a-card :hoverable="true" class="card"> -->
 								<a style="color: lightgrey">{{ urlByLevel(item.url) }}</a>
 								<div class="result_card">
 									<a :href="item.url" class="a_style" v-html="item.title + ' -' + item.source_website"></a>
@@ -30,7 +28,6 @@
 									热度:{{ item.heat.substring(0, item.heat.length - 13) }}
 									<a style="float: right; color: lightgrey;" @click="get_similar_news(item.title)">相似新闻></a>
 								</div>
-							<!-- </a-card> -->
 						</a-list-item>
 					</a-list>
 				</a-spin>
@@ -80,9 +77,10 @@ const pattern = /[`~!@#$^\-&*()=|{}':;',\\\[\]\.<>\/?~！@#￥……&*（）—�
 
 
 export default {
-	name: 'SearchResult',
+	name: 'SearchResultM',
 	data() {
 		return {
+			is_mob: true,
 			content: '',
 			newsList: [],
 			loading: false,
@@ -178,20 +176,16 @@ export default {
 .title {
 	height: 80px;
 	width: 100%;
+	margin-left: 1%;
 	border-bottom: 0.05rem solid rgb(230, 230, 230);
 }
 .result {
-	margin-left: 150px;
-	width: 700px;
-	float: left;
+	width: 100%;
 }
 .right_module {
-	width: 33%;
-	float: left;
+	width: 100%;
 }
 .right_card {
-	margin-left: 15%;
-	border-radius: 10px;
 	width: 100%;
 	margin-top: 10px;
 }
@@ -204,9 +198,8 @@ export default {
 	font-size: 18px;
 }
 .result_tip {
-	width: 700px;
+	width: 100%;
 	margin-top: 5px;
-	margin-left: 150px;
 }
 .result_card {
 	margin-top: 5px;
@@ -227,13 +220,5 @@ export default {
 	font-weight: bold;
 	margin-top: 5%;
 	margin-left: 7%;
-}
-#logo {
-	margin-top: 1%;
-	margin-left: 1%;
-	width: auto;
-	height: auto;
-	max-width: 50%;
-	max-height: 50%;
 }
 </style>
